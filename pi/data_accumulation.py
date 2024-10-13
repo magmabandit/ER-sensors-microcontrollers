@@ -15,7 +15,6 @@ def create_shared_memory(size:int):
 
 if __name__ == '__main__':
     shm = create_shared_memory(12) # 12 * 8 bytes - tested up to a gigabyte size chunk
-
     print(f"Shared memory block created with name: {shm.name}")
     print("Press Ctrl+C to end shared memory instance")
    
