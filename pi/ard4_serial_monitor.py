@@ -1,13 +1,14 @@
 # serial monitor in python
+# 10/13/2024
 import serial
 import time
 
 # 1000 ms
-ser = serial.Serial('COM5', 9600)  # Replace 'COM3' with your Arduino's port
+ser = serial.Serial('COM5', 9600, timeout=0.001)  # Replace 'COM5' with your Arduino's port
 # # 7000 ms
-# ser2 = serial.Serial('COM7', 9600)  # Replace 'COM3' with your Arduino's port
+# ser2 = serial.Serial('COM7', 9600)
 # # 2000 ms
-# ser3 = serial.Serial('COM6', 9600)  # Replace 'COM3' with your Arduino's port
+# ser3 = serial.Serial('COM6', 9600)
 
 
 time.sleep(2)  # Allow time for the connection to establish
@@ -26,7 +27,6 @@ while True:
 
     except KeyboardInterrupt:
         # Exit the loop when Ctrl+C is pressed
-
         break
 
 # Close the serial connection

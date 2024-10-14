@@ -24,7 +24,7 @@ def writer(shm_name):
     except KeyboardInterrupt:
         print("Closing Writer...")
         
-    return 1
+    return 0
 
 # data accumulator program MUST BE RUNNING for this to work
 if __name__ == '__main__':
