@@ -1,39 +1,44 @@
-# data accumulation for sensors & microcontrollers [ALPHA]
-# Alex Lee
-# 10/1/2024
+# beginnings of a data accumulator script: instantiates pool of shared
+# memory of a specified size (see consts) and frees it on exit
+#
+# Alex Lee, Robi
+# 10/19/2024
 
-import multiprocessing
 from multiprocessing import shared_memory
 import numpy as np
 import time
+import atexit
 
-def create_shared_memory(size:int):
-    # initialize shared memory block
-    # "mem123" is the "password" for this chunk of memory
-    shm = shared_memory.SharedMemory(create=True, size=size * 8, name="mem123")
-    return shm
+SHMEM_NAME = "mem123"
+SHMEM_NMEM = 10
+SHMEM_DTYPE = np.int64
+SHMEM_MEMB_SIZE = np.dtype(SHMEM_DTYPE).itemsize
+SHMEM_TOTAL_SIZE = SHMEM_NMEM * SHMEM_MEMB_SIZE
 
-if __name__ == '__main__':
-    shm = create_shared_memory(12) # 12 * 8 bytes - tested up to a gigabyte size chunk
-    print(f"Shared memory block created with name: {shm.name}")
-    print("Press Ctrl+C to end shared memory instance")
-   
-    # store some initial arbitrary data to the shm
-    # this is for testing purposes only!
-    a = np.array(range(10))
-    # create a NumPy array backed by shared memory
-    b = np.ndarray(a.shape, dtype=a.dtype, buffer=shm.buf)
-    b[:] = a[:]  # copy the original data into shared memory
+# Basically our destructor
+def cleanup_shmem(shared_mem_inst):
+    print("Cleaning up shared memory...")
+    shared_mem_inst.close()
+    shared_mem_inst.unlink()
 
-    try:
-        # keep the shared memory alive
-        # other programs can utilize the shm at this time
-        while True:
-            time.sleep(1)
-    except KeyboardInterrupt:
-        print("Cleaning up shared memory...")
-        shm.close()
-        
-        # once the last process closes its shm instance it gets deleted
-        shm.unlink() # queues shm cleanup
-    
+shm = shared_memory.SharedMemory(
+    create=True, size=SHMEM_TOTAL_SIZE, name=SHMEM_NAME
+)
+atexit.register(cleanup_shmem, shared_mem_inst=shm)
+
+# create a NumPy array backed by shared memory
+shm_handle = np.ndarray(shape=SHMEM_NMEM, dtype=SHMEM_DTYPE, buffer=shm.buf)
+
+print(f"Shared memory block created with name \"{shm.name}\" of size {SHMEM_MEMB_SIZE}")
+print("Will be free'd on program exit")
+
+# store some initial arbitrary data to the shm
+# this is for testing purposes only!
+writebuf = np.array(range(SHMEM_NMEM))
+
+shm_handle[:] = writebuf[:]  # copy the original data into shared memory
+
+# Do nothing; host shared memory
+
+while True:
+    time.sleep(1)
