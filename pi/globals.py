@@ -19,3 +19,9 @@ SHMEM_NMEM = 10
 SHMEM_DTYPE = np.int64
 SHMEM_MEMB_SIZE = np.dtype(SHMEM_DTYPE).itemsize
 SHMEM_TOTAL_SIZE = SHMEM_NMEM * SHMEM_MEMB_SIZE
+
+# USB port names
+PI_USB0 = "/dev/ttyACM0"
+PI_USB1 = "/dev/ttyACM1"
+PI_USB2 = "/dev/ttyACM2"
+PI_USB3 = "/dev/ttyACM3"
