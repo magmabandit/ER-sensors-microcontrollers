@@ -13,6 +13,10 @@ def cleanup_shmem(shared_mem_inst):
     shared_mem_inst.close()
     shared_mem_inst.unlink()
 
+# writes the value stored at idx in the handle to serial port of selected arduino
+def write_to_arduino(s: serial.Serial, idx:int, shmem: np.ndarray[SHMEM_DTYPE]):
+    s.write(str(shmem[idx]).encode('utf-8'))
+
 shm = shared_memory.SharedMemory(
     create=True, size=SHMEM_TOTAL_SIZE, name=SHMEM_NAME
 )
@@ -30,20 +34,26 @@ writebuf = np.zeros(shape=SHMEM_NMEM)
 shm_handle[:] = writebuf[:]  # copy the original data into shared memory
 
 
-ser = serial.Serial('COM5', 9600, timeout=0.001)  # Replace 'COM5' with Arduino's port
+ard1 = serial.Serial('COM5', 9600, timeout=0.001)  # Replace 'COM5' with Arduino's port
 
 # read serial output from arduinos and host shared memory
 while True:
-    # arduino 1
-    pedal_sens = ser.readline().decode('utf-8').strip()
-
-    # if one arduino prints from more than one sensor, we need to distinguish
-    # the sensors here
+    # each arduino reads more than one sensor, so we need to distinguish each
+    # reading using an array
+    
+    a1_data = ard1.readline().decode('utf-8').strip().split(',') # readings are comma separated
+    # ard2 = ser2. ...
+    
+    # this arduino arbitrarily outputs just 2 pedal sensor readings
+    # will probably need to change later
 
     # skip garbage vals
     # TODO - sentinel value?
-    if (pedal_sens != '' and pedal_sens != '-'):
-        shm_handle[0] = SHMEM_DTYPE(pedal_sens)
+    if (a1_data != '' and a1_data != '-'):
+        shm_handle[0] = SHMEM_DTYPE(a1_data[0])
+        shm_handle[0] = SHMEM_DTYPE(a1_data[1])
+
+    write_to_arduino(ard1, 0, shm_handle)
     
     # sync every 1 ms
     time.sleep(.001)

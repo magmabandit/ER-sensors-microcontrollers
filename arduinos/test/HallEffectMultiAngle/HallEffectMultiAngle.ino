@@ -41,7 +41,7 @@ void loop() {
   // I use Serial.print for the first angle and the comma so that way
   // everything stays on the same line when it gets printed
   Serial.print(angle);
-  Serial.print(", ");
+  Serial.print(",");
   Serial.println(angle2);
 
 }

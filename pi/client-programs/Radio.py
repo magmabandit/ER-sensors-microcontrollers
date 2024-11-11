@@ -4,6 +4,7 @@ import datetime
 import threading,time,json
 from queue import Queue
 import pandas as pd
+from globals import *
 
 lock = threading.Lock()
 ws = []
@@ -52,19 +53,28 @@ theServer = HTTPServer(('localhost',8000),MyServerClass)
 # "dictionary" stores key=sensor type, value=sensor reading, 
 # and the current time as a key/val pair. To convert into excel file
 def usbListener():
+    # read from shm, put relevent data in curr, sensors, and dictionary,
+    # let other parts of the code handle this data
+    shm = shared_memory.SharedMemory(name=SHMEM_NAME)
+    
     global curr
     global sensors
+
     # copy shm into array and store in sensors
-    dictionary = {}
+    sensors = np.ndarray(size=SHMEM_TOTAL_SIZE, dtype=SHMEM_DTYPE, buffer=shm.buf)
+    
+    
     # store sensor value along with its name for each sensor
     # ex. dictionary["sensName"] = sensors[idx_of_sensor]
 
-    # read from shm, put relevent data in curr, sensors, and dictionary,
-    # let other parts of the code handle this data
-       
+
+    curr = []
+
     try:
         while True:
-            pass
+            dictionary = {}
+            for i in range(len(sensors)):
+                dictionary[SENS_NAMES[i]] = sensors[i]
             # read & do stuff here
     except KeyboardInterrupt:
         df = pd.DataFrame.from_dict(dictionary)
