@@ -51,7 +51,7 @@ while True:
     # TODO - sentinel value?
     if (a1_data != '' and a1_data != '-'):
         shm_handle[0] = SHMEM_DTYPE(a1_data[0])
-        shm_handle[0] = SHMEM_DTYPE(a1_data[1])
+        shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
     write_to_arduino(ard1, 0, shm_handle)
     
