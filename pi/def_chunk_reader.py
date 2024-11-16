@@ -9,13 +9,14 @@ def chunkReader(shm_name):
 
     while True:
         try:
-            arr = np.ndarray(size=SHMEM_TOTAL_SIZE, dtype=SHMEM_DTYPE, buffer=existing_shm.buf)
+            arr = np.ndarray(shape=SHMEM_TOTAL_SIZE, dtype=SHMEM_DTYPE, buffer=existing_shm.buf)
 
             print(arr)
             print("\n")
-            time.sleep(.001)
+            time.sleep(.01)
         except KeyboardInterrupt:
             existing_shm.close() # closes access to the shm for this program
+            break
 
     # we should not be calling unlink here; this would delete the entire shm
     # we reserve unlink to be called once in the accumulator

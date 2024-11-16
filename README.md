@@ -16,7 +16,7 @@
 - Push your work often, and **remember to pull before you start doing any work!!!**
   
 ### Navigating the raspberry pi
-- To ssh (need wifi): ```ssh racing@172.16.9.130```
+- To ssh (need wifi): ```ssh racing@172.16.9.248```
     - Or connect via usb (see RPI documentation in the Google Drive)
 - Password: ```504BostonAve```
 - **Important Commands**

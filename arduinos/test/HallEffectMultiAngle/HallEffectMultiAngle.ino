@@ -16,10 +16,12 @@ int HallSensor2 = A5;
 
 void setup() {
   // put your setup code here, to run once:
-  Serial.begin(9600);
+  Serial.begin(19200);
 
   pinMode(HallSensor, INPUT);
   pinMode(HallSensor2, INPUT);
+  
+  pinMode(13, OUTPUT);
 }
 
 void loop() {
@@ -44,4 +46,19 @@ void loop() {
   Serial.print(",");
   Serial.println(angle2);
 
+  // -----------------------------------------------
+  // READING DATA SENT FROM AGGREGATOR
+  // -----------------------------------------------
+  char buf[64];
+  if (Serial.available() > 0) {
+      Serial.readBytes(buf, 64);
+        if (atoi(buf) > 0) {
+          digitalWrite(13, HIGH);
+        }
+        else {
+          digitalWrite(13, LOW);
+        }
+  }
+
+    
 }
