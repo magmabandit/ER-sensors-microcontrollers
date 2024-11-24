@@ -26,4 +26,4 @@ PI_USB1 = "/dev/ttyACM1"
 PI_USB2 = "/dev/ttyACM2"
 PI_USB3 = "/dev/ttyACM3"
 
-SENS_NAMES = ["Pedal 1", "Pedal 2"]
+SENS_NAMES = ["Pedal 1", "Pedal 2", "SteeringWheel", "TBD0", "TBD1", "TBD2", "TBD3", "TBD4", "TBD5", "TBD6"]

@@ -34,12 +34,12 @@ class MyServerClass(BaseHTTPRequestHandler):
             self.end_headers()
             #while myQueue.qsize == 0:
                 #print("YO")
-        
-            z = {
-                "strID": curr[0],
-                "Value": str(curr[1]),
-               
-            }
+            for i in range(len(sensors)):
+                z = {
+                    "strID": SENS_NAMES[i],
+                    "Value": str(sensors[i]),
+                
+                }
             jsonString = json.dumps(z)
             #print(jsonString)
             self.wfile.write(bytes(jsonString,'utf-8'))
@@ -48,7 +48,7 @@ class MyServerClass(BaseHTTPRequestHandler):
 theServer = HTTPServer(('localhost',8000),MyServerClass)
 
 # change this to read from shared memory array
-# curr stores a tuple(?) of sensor name / sensor reading
+# (deprrecated) curr stores a tuple(?) of sensor name / sensor reading
 # sensors stores sensor type ~ keeps track of total # sensors
 # "dictionary" stores key=sensor type, value=sensor reading, 
 # and the current time as a key/val pair. To convert into excel file
@@ -57,7 +57,6 @@ def usbListener():
     # let other parts of the code handle this data
     shm = shared_memory.SharedMemory(name=SHMEM_NAME)
     
-    global curr
     global sensors
 
     # copy shm into array and store in sensors
@@ -68,7 +67,6 @@ def usbListener():
     # ex. dictionary["sensName"] = sensors[idx_of_sensor]
 
 
-    curr = []
 
     try:
         while True:
@@ -79,8 +77,7 @@ def usbListener():
     except KeyboardInterrupt:
         df = pd.DataFrame.from_dict(dictionary)
         df.to_excel("ModularTest.xlsx")
-        sensors = [] #????
-        curr = []
+        sensors = []
         #IDK
         theServer.shutdown()
      
