@@ -1,4 +1,5 @@
-# data accumulation for sensors & microcontrollers [ALPHA]
+# Data aggregator test program
+# Manually injects data into aggregator
 # Alex Lee, Jackie, Jishnu
 # 10/1/2024
 
@@ -13,7 +14,7 @@ def writer(shm_name):
         while True:
             existing_shm = shared_memory.SharedMemory(name=shm_name)
             # store array buffer from shm to array
-            arr = np.ndarray((10,), dtype=np.int16, buffer=existing_shm.buf)
+            arr = np.ndarray((10,), dtype=np.int64, buffer=existing_shm.buf)
             data = int(input("Please input data: "))
             arrayIndex = int(input("Input index 0-9: "))
             arr[arrayIndex] = data
