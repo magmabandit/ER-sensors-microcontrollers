@@ -46,7 +46,27 @@ read (**not write**) from the aggregator array to their liking
   with appropriately splicing this data.
 - Our *current* **aggregator array** stores the sensor readings as follows:
 
-| **Index**       | 0      | 1      | 2             | 3   | ... |
-|-----------------|--------|--------|---------------|-----|-----|
-| **Reading**     | Pedal1 | Pedal2 | SteeringWheel | TBD |     |
-| **From**        | Ard1   | Ard1   | TBD           | TBD |     |
+| **Index**  | 0             | 1         | 2         | 3         | 4         | 5         | 6         | 7         | ...  |
+|------------|--------------|-----------|-----------|-----------|-----------|-----------|-----------|-----------|------|
+| **Reading** | SteeringWheel | IMUAccelX | IMUAccelY | IMUAccelZ | IMUGyroX  | IMUGyroY  | IMUGyroZ  | IMUMagnetX | ...  |
+| **From**   | Ard1         | Ard1      | Ard1      | Ard1      | Ard1      | Ard1      | Ard1      | Ard2      | ...  |
+
+| **Index**  | 8         | 9         | 10         | 11         | 12        | 13        | 14      | 15      | ...  |
+|------------|-----------|-----------|-----------|-----------|----------|----------|--------|--------|------|
+| **Reading** | IMUMagnetY | IMUMagnetZ | WSFrontLeft | WSFrontRight | WSBackLeft | WSBackRight | Motor1 | Motor2 | ...  |
+| **From**   | Ard2      | Ard2      | TBD      | TBD      | TBD     | TBD     | CAN   | CAN   | ...  |
+
+| **Index**  | 16      | 17      | 18      | 19      | 20      | 21      | 22      | 23      | ...  |
+|------------|--------|--------|--------|--------|--------|--------|--------|--------|------|
+| **Reading** | Motor3 | Motor4 | Motor5 | Motor6 | Motor7 | Motor8 | Motor9 | Motor10 | ...  |
+| **From**   | CAN   | CAN   | CAN   | CAN   | CAN   | CAN   | CAN   | CAN    | ...  |
+
+| **Index**  | 24      | 25      | 26      | 27      | 28      | 29      | 30      | 31      | ...  |
+|------------|--------|--------|--------|--------|--------|--------|--------|--------|------|
+| **Reading** | Motor11 | Motor12 | Motor13 | Motor14 | Motor15 | Motor16 | BMS1 | BMS2 | ...  |
+| **From**   | CAN    | CAN    | CAN    | CAN    | CAN    | CAN    | CAN | CAN | ...  |
+
+| **Index**  | 32    | 33    | 34    | 35    | 36    | 37    |
+|------------|------|------|------|------|------|------|
+| **Reading** | BMS3 | BMS4 | BMS5 | BMS6 | BMS7 | BMS8 |
+| **From**   | CAN | CAN | CAN | CAN | CAN | CAN |
