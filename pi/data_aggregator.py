@@ -8,12 +8,28 @@
 # Alex Lee, Robi
 # 10/24/2024
 from globals import *
+import signal  # ADDED: Safe exit handling
+import sys  # ADDED: Needed for safe exit handling
+
 
 # Basically our destructor
 def cleanup_shmem(shared_mem_inst):
     print("Cleaning up shared memory...")
     shared_mem_inst.close()
     shared_mem_inst.unlink()
+
+
+# ====== ADDED: Safe Exit Handling ======
+def handle_exit(signum, frame):
+    """Handles termination signals (SIGINT, SIGTERM) to clean up shared memory safely."""
+    print("Received stop signal. Cleaning up...")
+    cleanup_shmem(shm)  # Ensure shared memory is properly freed
+    sys.exit(0)
+
+# Register signal handlers for safe exit
+signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., `sudo systemctl stop`)
+signal.signal(signal.SIGINT, handle_exit)   # Handles Ctrl+C termination
+# ========================================
 
 # writes the value stored at idx in the handle to serial port of selected arduino.
 # comma separated if there are multiple indices
@@ -41,6 +57,13 @@ writebuf = np.zeros(shape=SHMEM_NMEM)
 
 shm_handle[:] = writebuf[:]  # copy the original data into shared memory
 
+# ====== ADDED: Serial Connection Error Handling ======
+try:
+    ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM6' with Arduino's port
+except serial.SerialException:
+    print("Failed to connect to Arduino. Exiting...")
+    sys.exit(1)  # Prevent script from running indefinitely if serial fails
+# =====================================================
 
 ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
 # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
