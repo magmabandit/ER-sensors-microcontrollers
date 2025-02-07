@@ -41,20 +41,20 @@ writebuf = np.zeros(shape=SHMEM_NMEM)
 
 shm_handle[:] = writebuf[:]  # copy the original data into shared memory
 
+# ====== ADDED: Serial Connection Error Handling ======
 i = 0
 while True:
     i += 1
     try:
         ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
+        # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
     except Exception as e: # or serialexception?
         time.sleep(0.01)
-        if i == 100:
+        if i == 100: # writes once every 200 attempts as to not flood the logs
             print("log: serial disconnected, trying again")
-            print("log: error: " + str(e))
+            print("log: error: " + str(e)) #only needed because it's not handling the specific exception
             i = 0
         continue
-
-# ard2 = serial.Serial('COM7', 19200, timeout=0.001)
 
 # read serial output from arduinos and host shared memory
 # threadify this?
