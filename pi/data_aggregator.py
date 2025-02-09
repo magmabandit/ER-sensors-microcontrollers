@@ -2,7 +2,7 @@
 # memory of a specified size (see globals) and frees it on exit;
 # handles writing to shared memory from arduino input, and writing values back
 # to arduinos
-# 
+#
 # must be connected to serial input to run
 #
 # Alex Lee, Robi
@@ -11,6 +11,10 @@ from globals import *
 import signal  # ADDED: Safe exit handling
 import sys  # ADDED: Needed for safe exit handling
 import struct
+import serial
+import redis
+import multiprocessing as mp
+import time
 
 
 # Basically our destructor
@@ -27,9 +31,12 @@ def handle_exit(signum, frame):
     cleanup_shmem(shm)  # Ensure shared memory is properly freed
     sys.exit(0)
 
+
 # Register signal handlers for safe exit
 signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., `sudo systemctl stop`)
-signal.signal(signal.SIGINT, handle_exit)   # Handles Ctrl+C termination
+signal.signal(signal.SIGINT, handle_exit)  # Handles Ctrl+C termination
+
+
 # ========================================
 
 # writes a message containing specified shm readings given an array of indices
@@ -43,15 +50,15 @@ signal.signal(signal.SIGINT, handle_exit)   # Handles Ctrl+C termination
 #
 # Ideally, this should be executed less than once per ms (safely once per
 # 5-10ms for most cases) to avoid flooding the serial buffer
-def write_to_arduino(s: serial.Serial, shmem: np.ndarray[SHMEM_DTYPE], *indexes:int):
+def write_to_arduino(s: serial.Serial, shmem: np.ndarray[SHMEM_DTYPE], *indexes: int):
     sync = b'\xFF'
     length = bytes([len(indexes)])
-    
+
     s.write(sync)
     s.write(length)
     for i in indexes:
         s.write(struct.pack('<f', shmem[i]))
-    
+
 
 shm = shared_memory.SharedMemory(
     create=True, size=SHMEM_TOTAL_SIZE, name=SHMEM_NAME
@@ -69,6 +76,56 @@ writebuf = np.zeros(shape=SHMEM_NMEM)
 
 shm_handle[:] = writebuf[:]  # copy the original data into shared memory
 
+
+def redis_subscriber(channel, index, counter_lock, shm, host="localhost", port=6379):
+    r = redis.Redis(host=host, port=port, db=0)
+    pubsub = r.pubsub()
+    pubsub.subscribe(channel)
+
+    last_reset_time = time.time()
+    message_count = 0
+
+    print("Subscriber started. Waiting for messages...")
+    for message in pubsub.listen():
+        if message["type"] == "message":
+            current_time = time.time()
+
+            # Reset the counter every second
+            if current_time - last_reset_time >= 1:
+                message_count = 0
+                last_reset_time = current_time
+
+            # Depending on how the published messages evolve, this can be a rate per channel
+            if message_count < MAX_REDIS_MESSAGES_PER_SECOND:
+                write_to_shm(message, index, counter_lock, shm)
+                message_count += 1
+            else:
+                time.sleep(0.1)
+
+
+def write_to_shm(message, lock, index, shm):
+    try:
+        # Ensure only one process writes at a time
+        with lock:
+            idx = index.value % SHMEM_NMEM  # Wrap around if the array is full
+            shm[idx] = message  # Store data in the array
+            print(f"Stored {message} at index {idx}")
+            index.value += 1  # Move to next index
+    except ValueError:
+        print(f"Invalid data received: {message['data'].decode('utf-8')}")
+
+
+# Shared index for write position
+index = mp.Value("i", 0)  # Shared integer for tracking position
+counter_lock = mp.Lock()  # Lock for synchronization
+MAX_REDIS_MESSAGES_PER_SECOND = 10
+
+# Start the Redis subscriber in a separate process
+redis_process = mp.Process(
+    target=redis_subscriber, args=("canusb_data", index, counter_lock, shm_handle)
+)
+redis_process.start()
+
 # ====== ADDED: Serial Connection Error Handling ======
 
 i = 0
@@ -80,7 +137,7 @@ while True:
         break
     except serial.SerialException:
         time.sleep(0.01)
-        if i == 100: # writes once every 100 attempts as to not flood the logs
+        if i == 100:  # writes once every 100 attempts as to not flood the logs
             print("log: serial disconnected, trying again")
             #print("log: error: " + str(e)) #only needed if it's not handling a specific connection
             i = 0
@@ -92,13 +149,12 @@ while True:
     try:
         # TODO: we need to catch serial errors here as well to avoid the
         # aggregator crashing
-        a1_data = ard1.readline().decode('utf-8').strip().split(',') # readings are comma separated
+        a1_data = ard1.readline().decode('utf-8').strip().split(',')  # readings are comma separated
         # a2_data = ard2. ...
     except UnicodeDecodeError:
         continue
         #print("Log: decoding issue")
-    
-    
+
     if (all(reading != '' and reading != '-' for reading in a1_data) and len(a1_data) == 2):
         shm_handle[0] = SHMEM_DTYPE(a1_data[0])
         shm_handle[1] = SHMEM_DTYPE(a1_data[1])
