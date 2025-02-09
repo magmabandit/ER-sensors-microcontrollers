@@ -65,7 +65,7 @@ except serial.SerialException:
     sys.exit(1)  # Prevent script from running indefinitely if serial fails
 # =====================================================
 
-ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
+ard1 = serial.Serial('COM5', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
 # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
 
 # read serial output from arduinos and host shared memory
