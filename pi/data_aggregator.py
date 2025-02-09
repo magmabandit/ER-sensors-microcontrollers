@@ -42,7 +42,7 @@ writebuf = np.zeros(shape=SHMEM_NMEM)
 shm_handle[:] = writebuf[:]  # copy the original data into shared memory
 
 
-ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
+ard1 = serial.Serial('COM5', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
 # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
 
 # read serial output from arduinos and host shared memory
