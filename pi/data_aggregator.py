@@ -48,6 +48,7 @@ while True:
     try:
         ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
         # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
+        break
     except Exception as e: # or serialexception?
         time.sleep(0.01)
         if i == 100: # writes once every 200 attempts as to not flood the logs
