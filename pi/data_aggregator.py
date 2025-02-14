@@ -8,12 +8,28 @@
 # Alex Lee, Robi
 # 10/24/2024
 from globals import *
+import signal  # ADDED: Safe exit handling
+import sys  # ADDED: Needed for safe exit handling
+
 
 # Basically our destructor
 def cleanup_shmem(shared_mem_inst):
     print("Cleaning up shared memory...")
     shared_mem_inst.close()
     shared_mem_inst.unlink()
+
+
+# ====== ADDED: Safe Exit Handling ======
+def handle_exit(signum, frame):
+    """Handles termination signals (SIGINT, SIGTERM) to clean up shared memory safely."""
+    print("Received stop signal. Cleaning up...")
+    cleanup_shmem(shm)  # Ensure shared memory is properly freed
+    sys.exit(0)
+
+# Register signal handlers for safe exit
+signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., `sudo systemctl stop`)
+signal.signal(signal.SIGINT, handle_exit)   # Handles Ctrl+C termination
+# ========================================
 
 # writes the value stored at idx in the handle to serial port of selected arduino.
 # comma separated if there are multiple indices
@@ -42,16 +58,17 @@ writebuf = np.zeros(shape=SHMEM_NMEM)
 shm_handle[:] = writebuf[:]  # copy the original data into shared memory
 
 # ====== ADDED: Serial Connection Error Handling ======
+
 i = 0
 while True:
     i += 1
     try:
-        ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM5' with Arduino's port
+        ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM6' with Arduino's port
         # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
         break
     except Exception as e: # or serialexception?
         time.sleep(0.01)
-        if i == 100: # writes once every 200 attempts as to not flood the logs
+        if i == 100: # writes once every 100 attempts as to not flood the logs
             print("log: serial disconnected, trying again")
             print("log: error: " + str(e)) #only needed because it's not handling the specific exception
             i = 0

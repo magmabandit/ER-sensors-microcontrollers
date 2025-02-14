@@ -1,6 +1,6 @@
 # Importing flask module in the project is mandatory
 # An object of Flask class is our WSGI application.
-from flask import Flask
+from flask import Flask, render_template
 from multiprocessing import shared_memory
 import time
 import atexit
@@ -21,9 +21,9 @@ def hello_world():
     existing_shm = shared_memory.SharedMemory(name="mem123")
     arr = np.ndarray(shape=10, dtype=np.int64, buffer=existing_shm.buf)
     # Convert array to string for display
-    arr_string = str(arr.tolist())
+    arr_string = str(arr[0].tolist())
     existing_shm.close()
-    return f'Array contents: {arr_string}'
+    return render_template("index.html", array_data = arr_string)
 
 # main driver function
 if __name__ == '__main__':
