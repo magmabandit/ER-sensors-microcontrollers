@@ -66,11 +66,11 @@ while True:
         ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM6' with Arduino's port
         # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
         break
-    except Exception as e: # or serialexception?
+    except serial.SerialException:
         time.sleep(0.01)
         if i == 100: # writes once every 100 attempts as to not flood the logs
             print("log: serial disconnected, trying again")
-            print("log: error: " + str(e)) #only needed because it's not handling the specific exception
+            #print("log: error: " + str(e)) #only needed if it's not handling a specific connection
             i = 0
         continue
 
