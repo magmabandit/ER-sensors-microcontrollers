@@ -10,6 +10,7 @@
 from globals import *
 import signal  # ADDED: Safe exit handling
 import sys  # ADDED: Needed for safe exit handling
+import struct
 
 
 # Basically our destructor
@@ -31,15 +32,26 @@ signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., 
 signal.signal(signal.SIGINT, handle_exit)   # Handles Ctrl+C termination
 # ========================================
 
-# writes the value stored at idx in the handle to serial port of selected arduino.
-# comma separated if there are multiple indices
+# writes a message containing specified shm readings given an array of indices
+# to a serial port of an arduino. 
+# Message contains:
+#   - Synchronization byte
+#   - Reading quantity byte
+#   - 4 bytes per specified reading * quanity of readings (currently a float32)
+# Up to the arduino to handle messages, but they should assume reading quantity
+# is no more than a byte (no more than 16 readings per message).
+#
+# Ideally, this should be executed less than once per ms (safely once per
+# 5-10ms for most cases) to avoid flooding the serial buffer
 def write_to_arduino(s: serial.Serial, shmem: np.ndarray[SHMEM_DTYPE], *indexes:int):
-    msg = ""
-    for i in indexes:
-        msg += str(shmem[i]) + ","
+    sync = b'\xFF'
+    length = bytes([len(indexes)])
     
-    # remove trailing comma
-    s.write(msg[-1].encode('utf-8'))
+    s.write(sync)
+    s.write(length)
+    for i in indexes:
+        s.write(struct.pack('<f', shmem[i]))
+    
 
 shm = shared_memory.SharedMemory(
     create=True, size=SHMEM_TOTAL_SIZE, name=SHMEM_NAME
@@ -78,16 +90,14 @@ while True:
 # threadify this?
 while True:
     try:
+        # TODO: we need to catch serial errors here as well to avoid the
+        # aggregator crashing
         a1_data = ard1.readline().decode('utf-8').strip().split(',') # readings are comma separated
         # a2_data = ard2. ...
     except UnicodeDecodeError:
         continue
         #print("Log: decoding issue")
     
-    
-    # this arduino arbitrarily outputs just 2 pedal sensor readings
-    # skip garbage vals for all readings in the array, make sure values are
-    # updated only when values for both readings exist
     
     if (all(reading != '' and reading != '-' for reading in a1_data) and len(a1_data) == 2):
         shm_handle[0] = SHMEM_DTYPE(a1_data[0])
