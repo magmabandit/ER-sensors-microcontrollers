@@ -32,10 +32,6 @@ def handle_exit(signum, frame):
     sys.exit(0)
 
 
-# Register signal handlers for safe exit
-signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., `sudo systemctl stop`)
-signal.signal(signal.SIGINT, handle_exit)  # Handles Ctrl+C termination
-
 
 # ========================================
 
@@ -58,24 +54,6 @@ def write_to_arduino(s: serial.Serial, shmem: np.ndarray[SHMEM_DTYPE], *indexes:
     s.write(length)
     for i in indexes:
         s.write(struct.pack('<f', shmem[i]))
-
-
-shm = shared_memory.SharedMemory(
-    create=True, size=SHMEM_TOTAL_SIZE, name=SHMEM_NAME
-)
-atexit.register(cleanup_shmem, shared_mem_inst=shm)
-
-# create a NumPy array backed by shared memory
-shm_handle = np.ndarray(shape=SHMEM_NMEM, dtype=SHMEM_DTYPE, buffer=shm.buf)
-
-print(f"Shared memory block created with name \"{shm.name}\" of size {SHMEM_TOTAL_SIZE}")
-print("Will be free'd on program exit")
-
-# store some initial arbitrary data to the shm
-writebuf = np.zeros(shape=SHMEM_NMEM)
-
-shm_handle[:] = writebuf[:]  # copy the original data into shared memory
-
 
 def redis_subscriber(channel, index, counter_lock, shm, host="localhost", port=6379):
     r = redis.Redis(host=host, port=port, db=0)
@@ -115,18 +93,39 @@ def write_to_shm(message, lock, index, shm):
         print(f"Invalid data received: {message['data'].decode('utf-8')}")
 
 
-# Shared index for write position
-index = mp.Value("i", 0)  # Shared integer for tracking position
-counter_lock = mp.Lock()  # Lock for synchronization
-MAX_REDIS_MESSAGES_PER_SECOND = 10
+if __name__ == "__main__":
+    # Register signal handlers for safe exit
+    signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., `sudo systemctl stop`)
+    signal.signal(signal.SIGINT, handle_exit)  # Handles Ctrl+C termination
 
-# Start the Redis subscriber in a separate process
-redis_process = mp.Process(
-    target=redis_subscriber, args=("canusb_data", index, counter_lock, shm_handle)
-)
-redis_process.start()
+    shm = shared_memory.SharedMemory(
+        create=True, size=SHMEM_TOTAL_SIZE, name=SHMEM_NAME
+    )
+    atexit.register(cleanup_shmem, shared_mem_inst=shm)
 
-# ====== ADDED: Serial Connection Error Handling ======
+    # create a NumPy array backed by shared memory
+    shm_handle = np.ndarray(shape=SHMEM_NMEM, dtype=SHMEM_DTYPE, buffer=shm.buf)
+
+    print(f"Shared memory block created with name \"{shm.name}\" of size {SHMEM_TOTAL_SIZE}")
+    print("Will be free'd on program exit")
+
+    # store some initial arbitrary data to the shm
+    writebuf = np.zeros(shape=SHMEM_NMEM)
+
+    shm_handle[:] = writebuf[:]  # copy the original data into shared memory
+
+    # Shared index for write position
+    index = mp.Value("i", 0)  # Shared integer for tracking position
+    counter_lock = mp.Lock()  # Lock for synchronization
+    MAX_REDIS_MESSAGES_PER_SECOND = 10
+
+    # Start the Redis subscriber in a separate process
+    redis_process = mp.Process(
+        target=redis_subscriber, args=("canusb_data", index, counter_lock, shm_handle)
+    )
+    redis_process.start()
+
+    # ====== ADDED: Serial Connection Error Handling ======
 
 i = 0
 while True:
@@ -143,21 +142,21 @@ while True:
             i = 0
         continue
 
-# read serial output from arduinos and host shared memory
-# threadify this?
-while True:
-    try:
-        # TODO: we need to catch serial errors here as well to avoid the
-        # aggregator crashing
-        a1_data = ard1.readline().decode('utf-8').strip().split(',')  # readings are comma separated
-        # a2_data = ard2. ...
-    except UnicodeDecodeError:
-        continue
-        #print("Log: decoding issue")
+    # read serial output from arduinos and host shared memory
+    # threadify this?
+    while True:
+        try:
+            # TODO: we need to catch serial errors here as well to avoid the
+            # aggregator crashing
+            a1_data = ard1.readline().decode('utf-8').strip().split(',')  # readings are comma separated
+            # a2_data = ard2. ...
+        except UnicodeDecodeError:
+            continue
+            #print("Log: decoding issue")
 
-    if (all(reading != '' and reading != '-' for reading in a1_data) and len(a1_data) == 2):
-        shm_handle[0] = SHMEM_DTYPE(a1_data[0])
-        shm_handle[1] = SHMEM_DTYPE(a1_data[1])
+        if (all(reading != '' and reading != '-' for reading in a1_data) and len(a1_data) == 2):
+            shm_handle[0] = SHMEM_DTYPE(a1_data[0])
+            shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
     write_to_arduino(ard1, shm_handle, 0, 1)
     # sync every 1 ms
