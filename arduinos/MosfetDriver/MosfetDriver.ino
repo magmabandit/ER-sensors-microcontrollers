@@ -29,12 +29,9 @@ void loop() {
         if (!receiving) {
             if (incomingByte == 0xFF) {  // Start marker detected
                 receiving = true;
-                // while (!Serial.available());  // Wait for length byte
-                // numFloats = Serial.read();
             }
             
         } else {
-          if (incomingByte == 0) {}
           if (incomingByte == 2) {
             FloatUnion reading1, reading2; // TODO: change to fit actual sensor readings
             for (int j = 0; j < 4; j++) {
@@ -51,9 +48,6 @@ void loop() {
             if (reading1.value == 0) { digitalWrite(12, HIGH); } else { digitalWrite(12, LOW);}
 
             if (reading2.value == 0) { digitalWrite(13, HIGH); Serial.write(0xAA);} else { digitalWrite(13, LOW); }
-            // Serial.write(0xAA); 
-            // Serial.write(0xAA); 
-            // Serial.write(0xAA);
           }
             // Template for reading a variable number of sensors:
             // -------------------------------------------------
