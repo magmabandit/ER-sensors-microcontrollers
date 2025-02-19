@@ -75,7 +75,7 @@ i = 0
 while True:
     i += 1
     try:
-        ard1 = serial.Serial('COM6', 19200, timeout=0.001)  # Replace 'COM6' with Arduino's port
+        ard1 = serial.Serial('COM7', 19200, timeout=0.005)  # Replace 'COM6' with Arduino's port
         # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
         break
     except serial.SerialException:
@@ -103,7 +103,6 @@ while True:
         shm_handle[0] = SHMEM_DTYPE(a1_data[0])
         shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
-    write_to_arduino(ard1, shm_handle, 0)
-    
+    write_to_arduino(ard1, shm_handle, 0, 1)
     # sync every 1 ms
     time.sleep(.001)

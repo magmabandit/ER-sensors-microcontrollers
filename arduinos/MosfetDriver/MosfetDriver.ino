@@ -10,7 +10,7 @@ union FloatUnion {
 };
 
 void setup() {
-    Serial.begin(115200); 
+    Serial.begin(19200); 
     pinMode(12, OUTPUT);
     pinMode(13, OUTPUT);
 }
@@ -23,17 +23,19 @@ void loop() {
 
     // get sensor readings from aggregator
     while (Serial.available()) {
+
         byte incomingByte = Serial.read();
 
         if (!receiving) {
             if (incomingByte == 0xFF) {  // Start marker detected
                 receiving = true;
-                while (!Serial.available());  // Wait for length byte
-                numFloats = Serial.read();
+                // while (!Serial.available());  // Wait for length byte
+                // numFloats = Serial.read();
             }
+            
         } else {
-          if (numFloats == 2) {
-
+          if (incomingByte == 0) {}
+          if (incomingByte == 2) {
             FloatUnion reading1, reading2; // TODO: change to fit actual sensor readings
             for (int j = 0; j < 4; j++) {
               while (!Serial.available());
@@ -46,9 +48,12 @@ void loop() {
             }
 
             // idea: power MOSFETs under some condition
-            if (reading1.value < 45) { digitalWrite(12, HIGH); } else { digitalWrite(12, LOW); }
+            if (reading1.value == 0) { digitalWrite(12, HIGH); } else { digitalWrite(12, LOW);}
 
-            if (reading2.value < 100.1) { digitalWrite(13, HIGH); } else { digitalWrite(13, LOW); }
+            if (reading2.value == 0) { digitalWrite(13, HIGH); Serial.write(0xAA);} else { digitalWrite(13, LOW); }
+            // Serial.write(0xAA); 
+            // Serial.write(0xAA); 
+            // Serial.write(0xAA);
           }
             // Template for reading a variable number of sensors:
             // -------------------------------------------------
