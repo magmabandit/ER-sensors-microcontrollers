@@ -21,9 +21,13 @@ def hello_world():
     existing_shm = shared_memory.SharedMemory(name="mem123")
     arr = np.ndarray(shape=10, dtype=np.int64, buffer=existing_shm.buf)
     # Convert array to string for display
-    arr_string = str(arr[0].tolist())
+    arr_string0 = str(arr[0].tolist())
+    arr_string1 = str(arr[1].tolist())
+    arr_string2 = str(arr[2].tolist())
+    arr_string3 = str(arr[3].tolist())
+    
     existing_shm.close()
-    return render_template("index.html", array_data = arr_string)
+    return render_template("index.html", array_data = [arr_string0, arr_string1, arr_string2, arr_string3])
 
 # main driver function
 if __name__ == '__main__':
