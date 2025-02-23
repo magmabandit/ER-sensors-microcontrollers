@@ -5,6 +5,25 @@
         <link rel = "stylesheet" type= "text/css" href = " {{ url_for('static', filename = 'style.css') }}">
     </head>
     <body>
+    <!-- This code connects WebsocketsIO to the index.html file, so it can update the
+     display in real-time. -->
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+        <script>
+        var socket = io.connect('http://' + document.domain + ':' + location.port);
+
+        // Waits to receive 'update_data' from socket's emit function in app.py
+        // Once it receives it, it runs the function.
+        // The parseFloat and toFixed(2) ensure that the data read is a float up to 2 decimal places.
+        socket.on('update_data', function(data) {
+            document.querySelectorAll('.data-box1')[0].innerText = parseFloat(data.array_data[0]).toFixed(2);
+            document.querySelectorAll('.data-box2')[0].innerText = parseFloat(data.array_data[1]).toFixed(2);
+            document.querySelectorAll('.data-box2')[1].innerText = parseFloat(data.array_data[2]).toFixed(2);
+            document.querySelectorAll('.data-box2')[2].innerText = parseFloat(data.array_data[3]).toFixed(2);
+        });
+        </script>
+
+        <!-- Creates the boxes that contain the data being read from
+         the shared memory. -->
         <div class = "title"> Electric Racing </div>
         <div class = "container">
             <div class = "data-box1"> {{ array_data[0] }} </div>
