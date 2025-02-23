@@ -439,7 +439,20 @@ static int inject_data_frame(int tty_fd, const char *hex_id, const char *hex_dat
   return error;
 }
 
+struct can_frame convert_to_can_frame(const unsigned char raw_data[32]) {
+    struct can_frame frame;
 
+    // Extract CAN ID (assuming stored in the first 4 bytes)
+    memcpy(&frame.can_id, raw_data, sizeof(frame.can_id));
+
+    // Extract CAN DLC (assuming stored in the next 4 bytes)
+    memcpy(&frame.can_dlc, raw_data + 4, sizeof(frame.can_dlc));
+
+    // Extract Data (next 8 bytes, assuming 8 bytes used)
+    memcpy(frame.data, raw_data + 8, sizeof(frame.data));
+
+    return frame;
+}
 
 static void dump_data_frames(redisContext* redis, int tty_fd)
 {
@@ -478,8 +491,9 @@ static void dump_data_frames(redisContext* redis, int tty_fd)
         printf("\n");
       }
     }
-      printf("Publishing frame...\n");
-      publish_can_message(redis, frame);
+      printf("Converting frame to struct...\n");
+      struct can_frame thisFrame = convert_to_can_frame(frame);
+      publish_can_message(redis, &thisFrame);
 
     if (terminate_after && (--terminate_after == 0))
       program_running = 0;
