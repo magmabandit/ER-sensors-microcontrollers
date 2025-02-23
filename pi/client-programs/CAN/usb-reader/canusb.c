@@ -149,7 +149,7 @@ static int frame_is_complete(const unsigned char *frame, int frame_len)
 
 
 
-static int frame_send(redisContext*& redis, int tty_fd, const unsigned char *frame, int frame_len)
+static int frame_send(int tty_fd, const unsigned char *frame, int frame_len)
 {
   int result, i;
 
@@ -169,11 +169,6 @@ static int frame_send(redisContext*& redis, int tty_fd, const unsigned char *fra
   }
 
   result = write(tty_fd, frame, frame_len);
-  // Seems like the right spot to publish these messages...
-  if (!redis) return EXIT_FAILURE;
-
-  printf("Publishing CAN messages...");
-  publish_can_message(redis, &frame);
   if (result == -1) {
     fprintf(stderr, "write() failed: %s\n", strerror(errno));
     return -1;
@@ -446,7 +441,7 @@ static int inject_data_frame(int tty_fd, const char *hex_id, const char *hex_dat
 
 
 
-static void dump_data_frames(int tty_fd)
+static void dump_data_frames(redisContext* redis, int tty_fd)
 {
   int i, frame_len;
   unsigned char frame[32];
@@ -465,7 +460,7 @@ static void dump_data_frames(int tty_fd)
       printf("Frame recieve error!\n");
 
     } else {
-
+      printf("Printing frame...\n");
       if ((frame_len >= 6) &&
           (frame[0] == 0xaa) &&
           ((frame[1] >> 4) == 0xc)) {
@@ -483,6 +478,8 @@ static void dump_data_frames(int tty_fd)
         printf("\n");
       }
     }
+      printf("Publishing frame...\n");
+      publish_can_message(redis, frame);
 
     if (terminate_after && (--terminate_after == 0))
       program_running = 0;
@@ -593,6 +590,10 @@ static void sigterm(int signo)
 
 int main(int argc, char *argv[])
 {
+  // Initialize Redis connection
+  redisContext* redis = connect_redis();
+  if (!redis) return EXIT_FAILURE;
+
   int c, tty_fd;
   char *tty_device = NULL, *inject_data = NULL, *inject_id = NULL;
   CANUSB_SPEED speed = CANUSB_SPEED_0;
@@ -672,7 +673,7 @@ int main(int argc, char *argv[])
 
   if (inject_data == NULL) {
     /* Dumping mode (default). */
-    dump_data_frames(tty_fd);
+    dump_data_frames(redis, tty_fd);
   } else {
     /* Inject mode. */
     if (inject_id == NULL) {
