@@ -494,7 +494,7 @@ static void dump_data_frames(redisContext* redis, int tty_fd)
       printf("Converting frame to struct...\n");
       struct can_frame thisFrame = convert_to_can_frame(frame);
       printf("Publishing frame...\n");
-      publish_can_message(redis, thisFrame);
+      publish_can_message(redis, &thisFrame);
 
     if (terminate_after && (--terminate_after == 0))
       program_running = 0;
