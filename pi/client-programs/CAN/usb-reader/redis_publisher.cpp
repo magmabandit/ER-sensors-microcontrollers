@@ -1,23 +1,4 @@
-#include <stdio.h>
-#include <stdlib.h>
-#include <string.h>
-#include <unistd.h>
-
-// These 2 packages need to be installed on the RPIs
-#include <hiredis/hiredis.h>
-#include <cjson/cJSON.h>
-
-#define REDIS_HOST "127.0.0.1"
-#define REDIS_PORT 6379
-#define REDIS_CHANNEL "canusb_data"
-#define RECONNECT_DELAY 5
-#define TEST_FILE "data.txt"
-
-struct can_frame {
-    int can_id;
-    int can_dlc;
-    unsigned char data[8];
-};
+#include "redis_publisher.hpp"
 
 // Function to establish Redis connection
 redisContext* connect_redis() {
@@ -36,10 +17,25 @@ redisContext* connect_redis() {
 }
 
 // Function to publish CAN message to Redis
+void publish_can_message(redisContext*& redis, const can_frame& frame) {
+    if (!redis) return;
+
+    char json_msg[256];
+    snprintf(json_msg, sizeof(json_msg),
+             "{\"id\": %d, \"data\": [%d, %d, %d, %d, %d, %d, %d, %d]}",
+             frame.can_id, frame.data[0], frame.data[1], frame.data[2], frame.data[3],
+             frame.data[4], frame.data[5], frame.data[6], frame.data[7]);
+
+    redisReply* reply = (redisReply*)redisCommand(redis, "PUBLISH %s %s", REDIS_CHANNEL, json_msg);
+    if (reply) freeReplyObject(reply);
+}
+
+/*
 void publish_can_message(redisContext **c, struct can_frame *frame) {
     if (!(*c) || !frame) return;
 
-    redisReply *ping_reply = redisCommand(*c, "PING");
+    redisReply* ping_reply = redisCommand(redis, "PUBLISH %s %s", REDIS_CHANNEL, json_msg);
+
     if (!ping_reply) {
         printf("Redis connection lost. Attempting to reconnect...\n");
         redisFree(*c);
@@ -122,13 +118,14 @@ void read_can_from_file(const char *filename, redisContext **redis) {
 
     fclose(file);
 }
+*/
 
 int main() {
     redisContext *redis = connect_redis();
     if (!redis) return EXIT_FAILURE;
 
     printf("Reading CAN messages from file: %s\n", TEST_FILE);
-    read_can_from_file(TEST_FILE, &redis);
+    //read_can_from_file(TEST_FILE, &redis);
 
     redisFree(redis);
     return EXIT_SUCCESS;

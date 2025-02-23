@@ -32,12 +32,10 @@ def handle_exit(signum, frame):
     cleanup_shmem(shm)  # Ensure shared memory is properly freed
     sys.exit(0)
 
-
 # ========================================
 
-
 # writes a message containing specified shm readings given an array of indices
-# to a serial port of an arduino.
+# to a serial port of an arduino. 
 # Message contains:
 #   - Synchronization byte
 #   - Reading quantity byte
@@ -48,13 +46,13 @@ def handle_exit(signum, frame):
 # Ideally, this should be executed less than once per ms (safely once per
 # 5-10ms for most cases) to avoid flooding the serial buffer
 def write_to_arduino(s: serial.Serial, shmem: np.ndarray[SHMEM_DTYPE], *indexes: int):
-    sync = b"\xFF"
+    sync = b'\xFF'
     length = bytes([len(indexes)])
 
     s.write(sync)
     s.write(length)
     for i in indexes:
-        s.write(struct.pack("<f", shmem[i]))
+        s.write(struct.pack('<f', shmem[i]))
 
 
 def redis_subscriber(
@@ -111,9 +109,7 @@ def write_to_shm(message, index, lock, shm):
 
 if __name__ == "__main__":
     # Register signal handlers for safe exit
-    signal.signal(
-        signal.SIGTERM, handle_exit
-    )  # Handles system termination (e.g., `sudo systemctl stop`)
+    signal.signal(signal.SIGTERM, handle_exit)  # Handles system termination (e.g., `sudo systemctl stop`)
     signal.signal(signal.SIGINT, handle_exit)  # Handles Ctrl+C termination
 
     shm = shared_memory.SharedMemory(
