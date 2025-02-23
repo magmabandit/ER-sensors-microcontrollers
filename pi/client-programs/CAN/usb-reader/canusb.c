@@ -149,7 +149,7 @@ static int frame_is_complete(const unsigned char *frame, int frame_len)
 
 
 
-static int frame_send(int tty_fd, const unsigned char *frame, int frame_len)
+static int frame_send(redisContext*& redis, int tty_fd, const unsigned char *frame, int frame_len)
 {
   int result, i;
 
@@ -169,6 +169,11 @@ static int frame_send(int tty_fd, const unsigned char *frame, int frame_len)
   }
 
   result = write(tty_fd, frame, frame_len);
+  // Seems like the right spot to publish these messages...
+  if (!redis) return EXIT_FAILURE;
+
+  printf("Publishing CAN messages...");
+  publish_can_message(redis, &frame);
   if (result == -1) {
     fprintf(stderr, "write() failed: %s\n", strerror(errno));
     return -1;

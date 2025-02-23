@@ -28,7 +28,4 @@ redisContext* connect_redis();
 // Function to publish CAN message to Redis
 void publish_can_message(redisContext*& redis, const can_frame& frame);
 
-// Function to read CAN messages from a file
-void read_can_from_file(const char *filename, redisContext **redis);
-
 #endif

@@ -17,17 +17,27 @@ redisContext* connect_redis() {
 }
 
 // Function to publish CAN message to Redis
-void publish_can_message(redisContext*& redis, const can_frame& frame) {
+void publish_can_message(redisContext*& redis, const struct can_frame* frame) {
     if (!redis) return;
 
-    char json_msg[256];
-    snprintf(json_msg, sizeof(json_msg),
-             "{\"id\": %d, \"data\": [%d, %d, %d, %d, %d, %d, %d, %d]}",
-             frame.can_id, frame.data[0], frame.data[1], frame.data[2], frame.data[3],
-             frame.data[4], frame.data[5], frame.data[6], frame.data[7]);
+    // Create a JSON object for the CAN frame
+    cJSON *json = cJSON_CreateObject();
+    cJSON_AddNumberToObject(json, "can_id", frame->can_id);
+    cJSON_AddNumberToObject(json, "can_dlc", frame->can_dlc);
 
-    redisReply* reply = (redisReply*)redisCommand(redis, "PUBLISH %s %s", REDIS_CHANNEL, json_msg);
+    cJSON *data_array = cJSON_CreateArray();
+    for (int i = 0; i < frame->can_dlc; i++) {
+        cJSON_AddItemToArray(data_array, cJSON_CreateNumber(frame->data[i]));
+    }
+    cJSON_AddItemToObject(json, "data", data_array);
+
+    char *message = cJSON_PrintUnformatted(json);
+
+    redisReply* reply = (redisReply*)redisCommand(redis, "PUBLISH %s %s", REDIS_CHANNEL, message);
     if (reply) freeReplyObject(reply);
+
+    free(message);
+    cJSON_Delete(json);
 }
 
 /*
@@ -125,7 +135,7 @@ int main() {
     if (!redis) return EXIT_FAILURE;
 
     printf("Reading CAN messages from file: %s\n", TEST_FILE);
-    //read_can_from_file(TEST_FILE, &redis);
+    read_can_from_file(TEST_FILE, &redis);
 
     redisFree(redis);
     return EXIT_SUCCESS;
