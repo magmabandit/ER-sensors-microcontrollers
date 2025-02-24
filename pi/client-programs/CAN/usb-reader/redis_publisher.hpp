@@ -25,6 +25,6 @@ struct can_frame {
 redisContext* connect_redis();
 
 // Function to publish CAN message to Redis
-void publish_can_message(redisContext*& redis, const can_frame& frame);
+void publish_can_message(redisContext* redis, const can_frame* frame);
 
-#endif
+#endif // REDIS_PUBLISHER_HPP
