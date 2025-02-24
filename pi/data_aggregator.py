@@ -148,7 +148,6 @@ while True:
     try:
         ard1 = serial.Serial('COM7', 19200, timeout=0.005)  # Replace 'COM6' with Arduino's port
         # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
-        break
     except serial.SerialException:
         time.sleep(0.01)
         if i == 100:  # writes once every 100 attempts as to not flood the logs
@@ -158,11 +157,9 @@ while True:
         continue
 
     # read serial output from arduinos and host shared memory
-    # threadify this?
     while True:
+        # handle non-CAN sensor data
         try:
-            # TODO: we need to catch serial errors here as well to avoid the
-            # aggregator crashing
             a1_data = (
                 ard1.readline().decode("utf-8").strip().split(",")
             )  # readings are comma separated
@@ -170,6 +167,8 @@ while True:
         except UnicodeDecodeError:
             continue
             # print("Log: decoding issue")
+        except serial.SerialException:
+            break
 
         if (
             all(reading != "" and reading != "-" for reading in a1_data)
@@ -178,6 +177,6 @@ while True:
             shm_handle[0] = SHMEM_DTYPE(a1_data[0])
             shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
-    write_to_arduino(ard1, shm_handle, 0, 1)
-    # sync every 1 ms
-    time.sleep(.001)
+        write_to_arduino(ard1, shm_handle, 0, 1)
+        # sync every 1 ms
+        time.sleep(.001)
