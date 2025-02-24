@@ -18,7 +18,11 @@
 ### Navigating the raspberry pi
 > For help running processes on the pi, consult [this doc](https://docs.google.com/document/d/1OpdQyfCx2rCK9NsRBMNGH5REVy5hcBR2D4hJm18ypzM/edit?tab=t.0)
 
-- To ssh (need wifi): ```ssh racing@ip_adress```
+- To ssh (need wifi): ```ssh racing@ip_address```
+  - IP Address of the pi is nonstatic, so it may change after reboot. Best
+    practice is to record the updated IP in the [Raspberry Pi Notes](https://docs.google.com/document/d/1L38DbeNVTXdy2rjHA2XFCWWCLJxBTOdWwQ8mu4jHm0g/edit?tab=t.0).
+    Tufts network settings (possibly) prohibit ssh-ing through hostname.
+    
 - Alternatives:
   - connect via usb / serial (see RPI documentation in the Google Drive)
   - connect via ext. keyboard + display
