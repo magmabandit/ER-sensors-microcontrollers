@@ -51,7 +51,7 @@
             </div>
             <div class = "battery_container">
                 <label><div class="label_text">
-                    <strong>Battery: {{ array_data[0] }}% </strong>
+                    <strong>Battery: {{ array_data[1] }}% </strong>
                 </div></label>
                 <div class="battery">
                     <div class="battery-level" id="batteryLevel"></div>
@@ -64,8 +64,8 @@
         </div>
 
         <script>
-            // let temperature = array_data[2];
-            let temperature = 10;
+            let temperature = array_data[2];
+            // let temperature = 10;
             let tempElement = document.getElementById('temperature');
 
             if (temperature >= 40) {
@@ -78,8 +78,8 @@
         </script>
 
         <script>
-            // let batteryLevel = array_data[1];  
-            let batteryLevel = 10;
+            let batteryLevel = array_data[1];  
+            // let batteryLevel = 10;
             let batteryElement = document.getElementById('batteryLevel');
                 batteryElement.style.width = batteryLevel + '%';
             if (batteryLevel <= 20) {
