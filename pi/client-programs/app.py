@@ -35,7 +35,7 @@ def background_thread():
     while True:
         shm_data = read_shm()
         socketio.emit('update_data', {'array_data': shm_data})
-        time.sleep(1)
+        time.sleep(0.5)
 
 # Creates a background thread that continously updates the display with
 # updated data from the shared memory.

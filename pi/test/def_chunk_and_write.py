@@ -3,6 +3,7 @@
 # Alex Lee, Jackie, Jishnu
 # 10/1/2024
 
+import random
 import multiprocessing
 from multiprocessing import shared_memory
 import numpy as np
@@ -22,6 +23,8 @@ def writer(shm_name):
             arr = np.ndarray(shape=SHMEM_NMEM, dtype=SHMEM_DTYPE, buffer=existing_shm.buf)
             data = float(input("Please input data: "))
             arrayIndex = int(input("Input index 0-9: "))
+            # random_float = random.uniform(300, 310)
+            # arr[0] = random_float
             arr[arrayIndex] = data
             existing_shm.close()
     except KeyboardInterrupt:
@@ -33,4 +36,3 @@ def writer(shm_name):
 # data accumulator program MUST BE RUNNING for this to work
 if __name__ == '__main__':
     writer("mem123")
-    

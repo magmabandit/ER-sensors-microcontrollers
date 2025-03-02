@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
     <head>
-        <title> Style File for Flask App </title>
+        <title> Flask App </title>
         <link rel = "stylesheet" type= "text/css" href = " {{ url_for('static', filename = 'style.css') }}">
     </head>
     <body>
@@ -24,7 +24,7 @@
 
         <!-- Creates the boxes that contain the data being read from
          the shared memory. -->
-        <div class = "title"> Electric Racing </div>
+        <!-- <div class = "title"> Electric Racing </div>
         <div class = "container">
             <div class = "data-box1"> {{ array_data[0] }} </div>
         </div>
@@ -33,9 +33,63 @@
         </div>
         <div class = "container">
             <div class = "data-box2"> {{ array_data[2] }} </div>
-        </div>
-        <div class = "container">
+        </div> -->
+        <!-- <div class = "container">
             <div class = "data-box2"> {{ array_data[3] }} </div>
+        </div> -->
+        <div class = "title">
+            <img src="https://sites.tufts.edu/racing/files/2020/04/cropped-newlogo-2.png"
+            width="450" length="1000"/>
+            <!-- <strong>TUFTS Electric Racing</strong> -->
         </div>
+        <div class = "container1">
+            <div class = "temp_container">
+                <label><div class = "label_text">
+                    <strong>Temperature: </strong>
+                </div></label>
+                <div class = "data-box2" id="temperature"> {{ array_data[2] }} </div>
+            </div>
+            <div class = "battery_container">
+                <label><div class="label_text">
+                    <strong>Battery: {{ array_data[0] }}% </strong>
+                </div></label>
+                <div class="battery">
+                    <div class="battery-level" id="batteryLevel"></div>
+                </div>
+            </div>    
+        </div>
+        <div class="container2">
+            <label><div class="label_speed"><br>SPEED:</div></label>
+            <div class = "data-box1"> {{ array_data[0] }} </div>
+        </div>
+
+        <script>
+            // let temperature = array_data[2];
+            let temperature = 10;
+            let tempElement = document.getElementById('temperature');
+
+            if (temperature >= 40) {
+                tempElement.style.backgroundColor = 'red'; // Beyond 40 → red
+            } else if (temperature <= 10) {
+                tempElement.style.backgroundColor = 'rgb(101, 200, 236)'; // Below 10 → ice blue
+            } else {
+                tempElement.style.backgroundColor = 'rgb(132, 222, 114)'; // 50% and above → green
+            }
+        </script>
+
+        <script>
+            // let batteryLevel = array_data[1];  
+            let batteryLevel = 10;
+            let batteryElement = document.getElementById('batteryLevel');
+                batteryElement.style.width = batteryLevel + '%';
+            if (batteryLevel <= 20) {
+                batteryElement.style.backgroundColor = 'red'; // Below 20% → red
+            } else if (batteryLevel <= 50) {
+                batteryElement.style.backgroundColor = 'yellow'; // Below 50% → yellow
+            } else {
+                batteryElement.style.backgroundColor = '#4caf50'; // 50% and above → green
+            }
+        </script>
+
     </body>
 </html>
