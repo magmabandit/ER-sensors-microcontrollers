@@ -17,8 +17,10 @@
         socket.on('update_data', function(data) {
             console.log("Received data", data);
             document.querySelector('.speed-box').innerText = parseFloat(data.array_data[0]).toFixed(2);
-            document.querySelector('.battery-container').innerText = parseFloat(data.array_data[1]).toFixed(2);
+            document.querySelector('.battery-box').innerText = parseFloat(data.array_data[1]).toFixed(2);
+            //TODO: Add something to update the battery in battery-level box
             document.querySelector('.temperature-box').innerText = parseFloat(data.array_data[2]).toFixed(2);
+            //TODO: Add something to update the color of temp box
         });
         </script>
 
@@ -27,22 +29,28 @@
             width="450" length="1000"/>
             <!-- TUFTS Electric Racing -->
         </div>
+
         <div class = "container1">
-            <div class = "temp_container">
+            <!-- <div class = "temp_container"> -->
                 <label><div class = "label_text">
                     <strong>Temperature: </strong>
                 </div></label>
                 <div class = "temperature-box" id="temperature"> {{ array_data[2] }} </div>
-            </div>
-            <div class = "battery_container">
+            <!-- </div> -->
+        </div>
+
+        <div class = "container3">
+            <!-- <div class = "battery_container"> -->
                 <label><div class="label_text">
-                    <strong>Battery: {{ array_data[1] }}% </strong>
+                    <strong>Battery: </strong>
+                    <div class = "battery-box">{{ array_data[1] }} </div>
                 </div></label>
                 <div class="battery">
                     <div class="battery-level" id="batteryLevel"></div>
                 </div>
-            </div>    
+            <!-- </div>     -->
         </div>
+
         <div class="container2">
             <label><div class="label_speed"><br>SPEED:</div></label>
             <div class = "speed-box"> {{ array_data[0] }} </div>
