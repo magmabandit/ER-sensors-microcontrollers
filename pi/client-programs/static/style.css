@@ -119,7 +119,7 @@
   height: 50%;
 }
 
-.data-box2 {
+.temperature-box {
   width: 50%;
   height: 70px;
   padding-top: 10px;
@@ -134,7 +134,7 @@
 }
 
 
-.data-box1 {
+.speed-box {
   width: 50%;
   height: 200px;
   padding-top: 50px;
