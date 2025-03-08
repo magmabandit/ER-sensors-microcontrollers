@@ -15,56 +15,49 @@
         // Once it receives it, it runs the function.
         // The parseFloat and toFixed(2) ensure that the data read is a float up to 2 decimal places.
         socket.on('update_data', function(data) {
-            document.querySelectorAll('.data-box1')[0].innerText = parseFloat(data.array_data[0]).toFixed(2);
-            document.querySelectorAll('.data-box2')[0].innerText = parseFloat(data.array_data[1]).toFixed(2);
-            document.querySelectorAll('.data-box2')[1].innerText = parseFloat(data.array_data[2]).toFixed(2);
-            document.querySelectorAll('.data-box2')[2].innerText = parseFloat(data.array_data[3]).toFixed(2);
+            console.log("Received data", data);
+            document.querySelector('.speed-box').innerText = parseFloat(data.array_data[0]).toFixed(2);
+            document.querySelector('.battery-box').innerText = parseFloat(data.array_data[1]).toFixed(2);
+            //TODO: Add something to update the battery in battery-level box
+            document.querySelector('.temperature-box').innerText = parseFloat(data.array_data[2]).toFixed(2);
+            //TODO: Add something to update the color of temp box
         });
         </script>
 
-        <!-- Creates the boxes that contain the data being read from
-         the shared memory. -->
-        <!-- <div class = "title"> Electric Racing </div>
-        <div class = "container">
-            <div class = "data-box1"> {{ array_data[0] }} </div>
-        </div>
-        <div class = "container">
-            <div class = "data-box2"> {{ array_data[1] }} </div>
-        </div>
-        <div class = "container">
-            <div class = "data-box2"> {{ array_data[2] }} </div>
-        </div> -->
-        <!-- <div class = "container">
-            <div class = "data-box2"> {{ array_data[3] }} </div>
-        </div> -->
         <div class = "title">
             <img src="https://sites.tufts.edu/racing/files/2020/04/cropped-newlogo-2.png"
             width="450" length="1000"/>
-            <!-- <strong>TUFTS Electric Racing</strong> -->
+            <!-- TUFTS Electric Racing -->
         </div>
+
         <div class = "container1">
-            <div class = "temp_container">
+            <!-- <div class = "temp_container"> -->
                 <label><div class = "label_text">
                     <strong>Temperature: </strong>
                 </div></label>
-                <div class = "data-box2" id="temperature"> {{ array_data[2] }} </div>
-            </div>
-            <div class = "battery_container">
+                <div class = "temperature-box" id="temperature"> {{ array_data[2] }} </div>
+            <!-- </div> -->
+        </div>
+
+        <div class = "container3">
+            <!-- <div class = "battery_container"> -->
                 <label><div class="label_text">
-                    <strong>Battery: {{ array_data[1] }}% </strong>
+                    <strong>Battery: </strong>
+                    <div class = "battery-box">{{ array_data[1] }} </div>
                 </div></label>
                 <div class="battery">
                     <div class="battery-level" id="batteryLevel"></div>
                 </div>
-            </div>    
+            <!-- </div>     -->
         </div>
+
         <div class="container2">
             <label><div class="label_speed"><br>SPEED:</div></label>
-            <div class = "data-box1"> {{ array_data[0] }} </div>
+            <div class = "speed-box"> {{ array_data[0] }} </div>
         </div>
 
         <script>
-            let temperature = array_data[2];
+            let temperature = array_data[1];
             // let temperature = 10;
             let tempElement = document.getElementById('temperature');
 

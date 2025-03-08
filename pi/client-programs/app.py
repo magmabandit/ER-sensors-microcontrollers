@@ -22,7 +22,7 @@ def read_shm():
         existing_shm = shared_memory.SharedMemory(name="mem123")
         arr = np.ndarray(shape=10, dtype=np.float32, buffer=existing_shm.buf)
         # Convert array to string for display
-        data = [arr[i].tolist() for i  in range(4)]
+        data = [arr[i].tolist() for i  in range(3)]
         existing_shm.close()
 
         return data

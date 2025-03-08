@@ -45,6 +45,14 @@
 .label_text {
   color: black;
   display: flex;
+  justify-content:left;
+  font-size: 40px;
+  padding: 10px;
+}
+
+.battery-box {
+  color: black;
+  display: flex;
   justify-content:center;
   font-size: 40px;
   padding: 10px;
@@ -60,16 +68,35 @@
 
 .container1 {
   display: flex;
-  justify-content: center;
+  justify-content: middle;
   align-items: top;
   padding: 5px;
   padding-top: 10px;
   padding-bottom: 10px;
   margin-top: auto;
-  width: 95%;
+  width: 590px;
   height: 100px;
   border: 2px solid black;
-  border-bottom: solid white;
+}
+
+.container3 {
+  display: flex;
+  justify-content: middle;
+  align-items: top;
+  padding: 5px;
+  padding-top: 10px;
+  padding-bottom: 10px;
+  margin-top: auto;
+  width: 590px;
+  height: 100px;
+  border: 2px solid black;
+}
+
+.container1,
+.container3 {
+    display: inline-block;
+    vertical-align: top; /* Align them properly */
+    margin-right: 2.5px; /* Add spacing */
 }
 
 .container2 {
@@ -86,7 +113,7 @@
   border-top: solid white;
 }
 
-.temp_container {
+/* .temp_container {
   display: flex;
   justify-content: left;
   align-items: left;
@@ -106,9 +133,9 @@
   padding-bottom: 50px;
   width: 500px;
   height: 90%;
-}
+} */
 
-.speed_container {
+/* .speed_container {
   display: flex;
   justify-content: right;
   align-items: right;
@@ -117,9 +144,9 @@
   padding-bottom: 50px;
   width: 400px;
   height: 50%;
-}
+} */
 
-.data-box2 {
+.temperature-box {
   width: 50%;
   height: 70px;
   padding-top: 10px;
@@ -133,8 +160,14 @@
   font-size: 40px;
 }
 
+.label_text,
+.temperature-box {
+    display: inline-block;
+    vertical-align: middle; /* Align them properly */
+    margin-right: 0px; /* Add spacing */
+}
 
-.data-box1 {
+.speed-box {
   width: 50%;
   height: 200px;
   padding-top: 50px;
@@ -174,4 +207,12 @@
   height: 100%;
   /* background-color: #4caf50; */
   border-radius: 5px;
+}
+
+.label_text,
+.battery-box,
+.battery {
+    display: inline-block;
+    vertical-align: middle; /* Align them properly */
+    margin-right: 0px; /* Add spacing */
 }
