@@ -11,6 +11,7 @@ from globals import *
 import signal  # ADDED: Safe exit handling
 import sys  # ADDED: Needed for safe exit handling
 import struct
+from ctypes import *
 import serial
 import redis
 import multiprocessing as mp
@@ -98,10 +99,73 @@ def write_to_shm(message, index, lock, shm):
     try:
         # Ensure only one process writes at a time
         with lock:
-            data = as_json(message)
+            data = as_json(message)            
             idx = data["id"]
-            shm[idx] = data["data"]  # Store data in the array
-            print(f"Stored {message} at index {idx}")
+            message = bytes(data["data"])  # Store data in the array
+            
+            
+
+            # Use below if its required to translate c-style char arrays
+            # message = bytes((c_ubyte * 8) (data["data"])) 
+            
+            # HANDLE ALL VALUES BELOW AS LITTLE ENDIAN
+            # the math to store the MC data in the shm is based on the number
+            # of MC Messages offset by the readings taken from each message.
+            # This makes it kind of horrible to add / remove readings since you
+            # need to modify the offsets of preceeding/succeeding readings based
+            # on the change, not to mention the cap of allocated MC indices in
+            # the shm. A more dynamic strategy is needed for future iterations
+            match idx:
+                case 160: # 'A0' - template value
+                    pass
+                case 161: # Temp 2
+                    cb_temp = np.float32(struct.unpack('<H', message[0:2])[0])
+                    shm[MOTOR_START_IDX + (idx - 160)] = cb_temp
+                case 162: # Temp 3
+                    cool_temp = np.float32(struct.unpack('<H', message[0:2])[0])
+                    htspt_temp = np.float32(struct.unpack('<H', message[2:4])[0])
+                    mot_temp = np.float32(struct.unpack('<H', message[4:6])[0])
+                    shm[MOTOR_START_IDX + (idx - 160)] = cool_temp
+                    shm[MOTOR_START_IDX + (idx - 159)] = htspt_temp
+                    shm[MOTOR_START_IDX + (idx - 158)] = mot_temp
+                case 163: # Analog Input
+                    # TODO: double check bit math
+                    bit_string = ''.join(format(byte, '08b') for byte in message) # for bitops.
+                    pedal1 = bit_string[-10:]
+                    pedal2 = bit_string[-20:-10]
+                    shm[MOTOR_START_IDX + (idx - 158)] = pedal1
+                    shm[MOTOR_START_IDX + (idx - 157)] = pedal2
+                case 164: # Dig. Input Status
+                    pass
+                case 165: # Motor Pos.
+                    motor_angle = np.float32(struct.unpack('<H', message[0:2])[0])
+                    motor_speed = np.float32(struct.unpack('<H', message[2:4])[0])
+                    shm[MOTOR_START_IDX + (idx - 158)] = motor_angle
+                    shm[MOTOR_START_IDX + (idx - 157)] = motor_speed
+                case 166: # Current Info
+                    dc_curr = np.float32(struct.unpack('<H', message[6:])[0])
+                    shm[MOTOR_START_IDX + (idx - 157)] = dc_curr
+                case 167: # Voltage Info
+                    dc_volt = np.float32(struct.unpack('<H', message[0:2])[0])
+                    shm[MOTOR_START_IDX + (idx - 157)] = dc_volt
+                case 170: # Internal States
+                    vsm_state = np.float32(struct.unpack('<H', message[0])[0])
+                    inv_state = np.float32(struct.unpack('<H', message[2])[0])
+                    direction = np.float32(int(message[7] & 1))
+                    shm[MOTOR_START_IDX + (idx - 159)] = vsm_state
+                    shm[MOTOR_START_IDX + (idx - 158)] = inv_state
+                    shm[MOTOR_START_IDX + (idx - 157)] = direction
+                case 172: # Torque / Timer
+                    torque = np.float32(struct.unpack('<H', message[0:2])[0])
+                    timer = np.float32(struct.unpack('<H', message[2:4])[0])
+                    shm[MOTOR_START_IDX + (idx - 158)] = torque
+                    shm[MOTOR_START_IDX + (idx - 157)] = timer
+                case _:
+                    print(f"CAN ID {idx} not yet handled for message {message}")
+
+                # TODO Handle BMS Readings - ID is unknown
+
+            # print(f"Stored {message} at index {idx}")
             index.value += 1  # Move to next index
     except ValueError:
         print(f"Invalid data received: {message['data'].decode('utf-8')}")

@@ -33,3 +33,5 @@ SENS_NAMES = ["SteeringWheel", "IMUAccelX", "IMUAccelY", "IMUAccelZ", "ImuGyroX"
                "Motor3", "Motor4", "Motor5", "Motor6", "Motor7", "Motor8", "Motor9", "Motor10", 
                "Motor11", "Motor12", "Motor13", "Motor14", "Motor15", "Motor16", 
                "BMS1", "BMS2", "BMS3", "BMS4", "BMS5", "BMS6", "BMS7", "BMS8"]
+
+MOTOR_START_IDX = SENS_NAMES.index("Motor1")
