@@ -15,12 +15,40 @@
         // Once it receives it, it runs the function.
         // The parseFloat and toFixed(2) ensure that the data read is a float up to 2 decimal places.
         socket.on('update_data', function(data) {
+
+            let speed = parseFloat(data.array_data[0]).toFixed(2);
+            let battery = parseFloat(data.array_data[1]).toFixed(2);
+            let temperature = parseFloat(data.array_data[2]).toFixed(2);
+
             console.log("Received data", data);
-            document.querySelector('.speed-box').innerText = parseFloat(data.array_data[0]).toFixed(2);
-            document.querySelector('.battery-box').innerText = parseFloat(data.array_data[1]).toFixed(2);
-            //TODO: Add something to update the battery in battery-level box
-            document.querySelector('.temperature-box').innerText = parseFloat(data.array_data[2]).toFixed(2);
-            //TODO: Add something to update the color of temp box
+            document.querySelector('.speed-box').innerText = speed;
+            document.querySelector('.battery-box').innerText = battery;
+            document.querySelector('.temperature-box').innerText = temperature;
+
+            // Updates the battery level display on the website.
+            let batteryLevel = data.array_data[1];  
+            let batteryElement = document.getElementById('batteryLevel');
+
+            batteryElement.style.width = batteryLevel + '%';
+            if (batteryLevel <= 20) {
+                batteryElement.style.backgroundColor = 'red'; // Below 20% → red
+            } else if (batteryLevel <= 50) {
+                batteryElement.style.backgroundColor = 'yellow'; // Below 50% → yellow
+            } else {
+                batteryElement.style.backgroundColor = '#4caf50'; // 50% and above → green
+            }
+
+            // Updates the temperature display on the website.
+            let temperatureValue = data.array_data[1];
+            let tempElement = document.getElementById('temperature');
+
+            if (temperature >= 40) {
+                tempElement.style.backgroundColor = 'red'; // Beyond 40 -> red
+            } else if (temperature <= 10) {
+                tempElement.style.backgroundColor = 'rgb(101, 200, 236)'; // Below 10 -> ice blue
+            } else {
+                tempElement.style.backgroundColor = 'rgb(132, 222, 114)'; // Between 10 and 40 -> green
+            }
         });
         </script>
 
@@ -55,34 +83,5 @@
             <label><div class="label_speed"><br>SPEED:</div></label>
             <div class = "speed-box"> {{ array_data[0] }} </div>
         </div>
-
-        <script>
-            let temperature = array_data[1];
-            // let temperature = 10;
-            let tempElement = document.getElementById('temperature');
-
-            if (temperature >= 40) {
-                tempElement.style.backgroundColor = 'red'; // Beyond 40 → red
-            } else if (temperature <= 10) {
-                tempElement.style.backgroundColor = 'rgb(101, 200, 236)'; // Below 10 → ice blue
-            } else {
-                tempElement.style.backgroundColor = 'rgb(132, 222, 114)'; // 50% and above → green
-            }
-        </script>
-
-        <script>
-            let batteryLevel = array_data[1];  
-            // let batteryLevel = 10;
-            let batteryElement = document.getElementById('batteryLevel');
-                batteryElement.style.width = batteryLevel + '%';
-            if (batteryLevel <= 20) {
-                batteryElement.style.backgroundColor = 'red'; // Below 20% → red
-            } else if (batteryLevel <= 50) {
-                batteryElement.style.backgroundColor = 'yellow'; // Below 50% → yellow
-            } else {
-                batteryElement.style.backgroundColor = '#4caf50'; // 50% and above → green
-            }
-        </script>
-
     </body>
 </html>
