@@ -39,15 +39,19 @@
             }
 
             // Updates the temperature display on the website.
-            let temperatureValue = data.array_data[1];
+            let temperatureValue = data.array_data[2];
             let tempElement = document.getElementById('temperature');
+            let iconElement = document.getElementById('temp-icon');
 
-            if (temperature >= 40) {
-                tempElement.style.backgroundColor = 'red'; // Beyond 40 -> red
-            } else if (temperature <= 10) {
-                tempElement.style.backgroundColor = 'rgb(101, 200, 236)'; // Below 10 -> ice blue
+            if (temperatureValue >= 40) {
+                iconElement.src = "https://static.vecteezy.com/system/resources/thumbnails/021/888/786/small_2x/hot-sale-price-labels-template-designs-with-flame-png.png"; // Path to the fire icon
+                tempElement.style.color = 'rgb(208, 13, 13)'; // Below 20% → red
+            } else if (temperatureValue <= 10) {
+                iconElement.src = "https://i.fbcd.co/products/resized/resized-750-500/895de29879013ce55cb0ccb7983e2faed5ffdb8840ae1bc364c5280f059a7554.jpg"; // Path to the snowflake icon
+                tempElement.style.color = '#3172AE';
             } else {
-                tempElement.style.backgroundColor = 'rgb(132, 222, 114)'; // Between 10 and 40 -> green
+                iconElement.src = "https://t3.ftcdn.net/jpg/09/14/62/62/360_F_914626243_k7LHxUYiDY5cq5BkymnOnxqlYNm4FyJi.jpg"; // Path to a neutral icon, e.g., a leaf or sun
+                tempElement.style.color = 'black';
             }
         });
         </script>
@@ -55,33 +59,30 @@
         <div class = "title">
             <img src="https://sites.tufts.edu/racing/files/2020/04/cropped-newlogo-2.png"
             width="450" length="1000"/>
-            <!-- TUFTS Electric Racing -->
         </div>
 
         <div class = "container1">
-            <!-- <div class = "temp_container"> -->
-                <label><div class = "label_text">
-                    <strong>Temperature: </strong>
-                </div></label>
-                <div class = "temperature-box" id="temperature"> {{ array_data[2] }} </div>
-            <!-- </div> -->
+            <label><div class = "label_text">
+                <strong>Temperature: </strong>
+            </div></label>
+            <div class = "temperature-box" id="temperature"> {{ array_data[2] }} </div>
+            <img class = "temperature-icon" id="temp-icon" src="https://t3.ftcdn.net/jpg/09/14/62/62/360_F_914626243_k7LHxUYiDY5cq5BkymnOnxqlYNm4FyJi.jpg" 
+            alt="Temperature icon" width = "112.5" height = "75">
         </div>
 
         <div class = "container3">
-            <!-- <div class = "battery_container"> -->
-                <label><div class="label_text">
-                    <strong>Battery: </strong>
-                    <div class = "battery-box">{{ array_data[1] }} </div>
-                </div></label>
-                <div class="battery">
-                    <div class="battery-level" id="batteryLevel"></div>
-                </div>
-            <!-- </div>     -->
+            <label><div class="label_text">
+                <strong>Battery: </strong>
+                <div class = "battery-box">{{ array_data[1] }} </div>
+            </div></label>
+            <div class="battery">
+                <div class="battery-level" id="batteryLevel"></div>
+            </div>
         </div>
 
         <div class="container2">
             <label><div class="label_speed"><br>SPEED:</div></label>
-            <div class = "speed-box"> {{ array_data[0] }} </div>
+            <div class = "speed-box">{{ array_data[0] }} </div>
         </div>
     </body>
 </html>
