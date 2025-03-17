@@ -234,12 +234,12 @@ while True:
         except serial.SerialException:
             break
 
-        if (
-            all(reading != "" and reading != "-" for reading in a1_data)
-            and len(a1_data) == 2
-        ):
-            shm_handle[0] = SHMEM_DTYPE(a1_data[0])
-            shm_handle[1] = SHMEM_DTYPE(a1_data[1])
+        # if (
+        #     all(reading != "" and reading != "-" for reading in a1_data)
+        #     and len(a1_data) == 2
+        # ):
+        #     shm_handle[0] = SHMEM_DTYPE(a1_data[0])
+        #     shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
         write_to_arduino(ard1, shm_handle, 0, 1)
         # sync every 1 ms

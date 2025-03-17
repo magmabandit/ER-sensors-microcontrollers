@@ -15,11 +15,6 @@ import numpy as np
 SHMEM_NAME = "mem123"
 # length of sensor data array stored in shm
 # Steering + IMU + Reserved wheel speeds [unused as of Spring 2025] + Motor + BMS
-SHMEM_NMEM = 38
-# datatype of sensor readings to be stored in shm
-SHMEM_DTYPE = np.float32
-SHMEM_MEMB_SIZE = np.dtype(SHMEM_DTYPE).itemsize
-SHMEM_TOTAL_SIZE = SHMEM_NMEM * SHMEM_MEMB_SIZE
 
 # USB port names
 PI_USB0 = "/dev/ttyACM0"
@@ -32,6 +27,12 @@ SENS_NAMES = ["SteeringWheel", "IMUAccelX", "IMUAccelY", "IMUAccelZ", "ImuGyroX"
                "WSFrontRight", "WSBackLeft", "WSBackRight", "Motor1", "Motor2", 
                "Motor3", "Motor4", "Motor5", "Motor6", "Motor7", "Motor8", "Motor9", "Motor10", 
                "Motor11", "Motor12", "Motor13", "Motor14", "Motor15", "Motor16", 
-               "BMS1", "BMS2", "BMS3", "BMS4", "BMS5", "BMS6", "BMS7", "BMS8"]
+               "BMSVolt1", "BMSVolt2", "BMSRes1", "BMSRes2", "BMSOV1", "BMSOV2", "BMS7", "BMS8"]
+
+SHMEM_NMEM = len(SENS_NAMES)
+# datatype of sensor readings to be stored in shm
+SHMEM_DTYPE = np.float32
+SHMEM_MEMB_SIZE = np.dtype(SHMEM_DTYPE).itemsize
+SHMEM_TOTAL_SIZE = SHMEM_NMEM * SHMEM_MEMB_SIZE
 
 MOTOR_START_IDX = SENS_NAMES.index("Motor1")
