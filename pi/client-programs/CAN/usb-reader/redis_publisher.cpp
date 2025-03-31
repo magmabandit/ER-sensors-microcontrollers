@@ -40,3 +40,58 @@ void publish_can_message(redisContext* redis, const struct can_frame* frame) {
         cJSON_Delete(json);
     }
 
+// DEBUG: reading from file instead of usb
+
+// Function to read CAN messages from a file
+void read_can_from_file(const char *filename, redisContext *redis) {
+    FILE *file = fopen(filename, "r");
+    if (!file) {
+        perror("Error opening test file");
+        return;
+    }
+
+    char line[256];
+    while (fgets(line, sizeof(line), file)) {
+        // Parse the line
+        double timestamp;
+        unsigned int frame_id;
+        unsigned char data[8];
+        int data_length = 0;
+
+        // Extract timestamp, frame ID, and data
+        if (sscanf(line, "%lf Frame ID: %x, Data: %hhx %hhx %hhx %hhx %hhx %hhx %hhx %hhx",
+                   &timestamp, &frame_id,
+                   &data[0], &data[1], &data[2], &data[3],
+                   &data[4], &data[5], &data[6], &data[7]) >= 9) {
+            // Determine the actual data length
+            data_length = 8;  // Assuming all CAN frames have 8 bytes of data
+
+            // Create a CAN frame
+            struct can_frame frame;
+            frame.can_id = frame_id;
+            frame.can_dlc = data_length;
+            memcpy(frame.data, data, data_length);
+
+            printf("Publish CAN message...");
+            publish_can_message(redis, &frame);
+
+            // Simulate delay between CAN messages
+            sleep(1);
+        } else {
+            printf("Error parsing line: %s\n", line);
+        }
+    }
+
+    fclose(file);
+}
+
+int main() {
+    redisContext *redis = connect_redis();
+    if (!redis) return EXIT_FAILURE;
+
+    printf("Reading CAN messages from file: %s\n", TEST_FILE);
+    read_can_from_file(TEST_FILE, redis);
+
+    redisFree(redis);
+    return EXIT_SUCCESS;
+}

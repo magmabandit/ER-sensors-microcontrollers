@@ -14,6 +14,7 @@
 #define REDIS_PORT 6379
 #define REDIS_CHANNEL "canusb_data"
 #define RECONNECT_DELAY 5
+#define TEST_FILE "data.txt" // DEBUG
 
 struct can_frame {
     int can_id;

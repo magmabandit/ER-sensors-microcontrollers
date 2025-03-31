@@ -92,15 +92,16 @@ def redis_subscriber(
 
 def as_json(message):
     data_bytes = message["data"]
-    return data_bytes.decode("utf-8")
+    return dict(data_bytes.decode("utf-8"))
 
 
 def write_to_shm(message, index, lock, shm):
     try:
         # Ensure only one process writes at a time
         with lock:
-            data = as_json(message)            
-            idx = data["id"]
+            data = as_json(message)["data"]
+            print(data)            
+            idx = data["can_id"]
             message = bytes(data["data"])  # Store data in the array
             
             
@@ -210,7 +211,7 @@ i = 0
 while True:
     i += 1
     try:
-        ard1 = serial.Serial('COM7', 19200, timeout=0.005)  # Replace 'COM6' with Arduino's port
+        ard1 = serial.Serial('/dev/ttyACM0', 19200, timeout=0.001)  # Replace 'COM6' with Arduino's port
         # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
     except serial.SerialException:
         time.sleep(0.01)
@@ -218,7 +219,7 @@ while True:
             print("log: serial disconnected, trying again")
             #print("log: error: " + str(e)) #only needed if it's not handling a specific connection
             i = 0
-        continue
+        continue 
 
     # read serial output from arduinos and host shared memory
     while True:
