@@ -11,6 +11,7 @@ from globals import *
 import signal  # ADDED: Safe exit handling
 import sys  # ADDED: Needed for safe exit handling
 import struct
+import ast
 from ctypes import *
 import serial
 import redis
@@ -92,7 +93,7 @@ def redis_subscriber(
 
 def as_json(message):
     data_bytes = message["data"]
-    return dict(data_bytes.decode("utf-8"))
+    return ast.literal_eval(data_bytes.decode("utf-8"))
 
 
 def write_to_shm(message, index, lock, shm):
