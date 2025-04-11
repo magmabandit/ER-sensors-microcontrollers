@@ -102,8 +102,8 @@ def write_to_shm(message, index, lock, shm):
         with lock:
             data = as_json(message)["data"]
             print(data)            
-            idx = data["can_id"]
-            message = bytes(data["data"])  # Store data in the array
+            idx = as_json(message)["can_id"]
+            message = bytes(data)  # Store data in the array
             
             
 
@@ -151,8 +151,8 @@ def write_to_shm(message, index, lock, shm):
                     dc_volt = np.float32(struct.unpack('<H', message[0:2])[0])
                     shm[MOTOR_START_IDX + (idx - 157)] = dc_volt
                 case 170: # Internal States
-                    vsm_state = np.float32(struct.unpack('<H', message[0])[0])
-                    inv_state = np.float32(struct.unpack('<H', message[2])[0])
+                    vsm_state = np.float32(message[0])
+                    inv_state = np.float32(message[2])
                     direction = np.float32(int(message[7] & 1))
                     shm[MOTOR_START_IDX + (idx - 159)] = vsm_state
                     shm[MOTOR_START_IDX + (idx - 158)] = inv_state

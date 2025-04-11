@@ -11,8 +11,8 @@ def randomize_bytes():
 
 start = time.time()
 # configure number of frame ids / weights if needed
-fids = ["0001", "0036", "00A2", "00A3", "00A4"]
-weights = [1, 5, 2, 2, 2]
+fids = ["0001", "0036", "00A0", "00A1", "00A2", "00A3", "00A4", "00A5", "00A6", "00A7", "00A8", "00A9", "00AA", "00AB", "00AC", "00AD", "00AE", "00AF"]
+weights = [1, 5, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2]
 
 while True:
     bytes = randomize_bytes()
