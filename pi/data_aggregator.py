@@ -1,17 +1,19 @@
 # data aggregator script: instantiates pool of shared
 # memory of a specified size (see globals) and frees it on exit;
-# handles writing to shared memory from arduino input, and writing values back
+# handles writing to shared memory from CAN, and writing values back
 # to arduinos
 #
 # must be connected to serial input to run
 #
 # Alex Lee, Robi
-# 10/24/2024
+# 4/12/2025
 from globals import *
+import random
 import signal  # ADDED: Safe exit handling
 import sys  # ADDED: Needed for safe exit handling
 import struct
 import ast
+
 from ctypes import *
 import serial
 import redis
@@ -88,7 +90,7 @@ def redis_subscriber(
                 write_to_shm(message, index, counter_lock, shm)
                 message_count += 1
             else:
-                time.sleep(0.1)
+                time.sleep(0.05)
 
 
 def as_json(message):
@@ -131,7 +133,6 @@ def write_to_shm(message, index, lock, shm):
                     shm[MOTOR_START_IDX + (idx - 159)] = htspt_temp
                     shm[MOTOR_START_IDX + (idx - 158)] = mot_temp
                 case 163: # Analog Input
-                    # TODO: double check bit math
                     bit_string = ''.join(format(byte, '08b') for byte in message) # for bitops.
                     pedal1 = bit_string[-10:]
                     pedal2 = bit_string[-20:-10]
@@ -163,9 +164,25 @@ def write_to_shm(message, index, lock, shm):
                     shm[MOTOR_START_IDX + (idx - 158)] = torque
                     shm[MOTOR_START_IDX + (idx - 157)] = timer
                 case _:
-                    print(f"CAN ID {idx} not yet handled for message {message}")
+                    # as of now, ids < A0 are exclusively from the BMS
+                    if idx < 160:
+                        int_res = np.float32(struct.unpack('<H', message[2:4])[0])
+                        open_volt = np.float32(struct.unpack('<H', message[4:6])[0])
+                        
+                        # sample cells at random and take the averages in final
+                        # BMS indices. Small chance for values from the same
+                        # cell to end up in both sampling cells, but effects are
+                        # negligible.
+                        shm[BMS_START_IDX + random.randint(2,3)] = int_res
+                        shm[BMS_START_IDX + random.randint(4,5)] = open_volt
 
-                # TODO Handle BMS Readings - ID is unknown
+                        avg_res = (shm[BMS_START_IDX + 2] + shm[BMS_START_IDX + 3]) / 2
+                        avg_ov  = (shm[BMS_START_IDX + 4] + shm[BMS_START_IDX + 5]) / 2
+
+                        shm[BMS_START_IDX + 6] = avg_res
+                        shm[BMS_START_IDX + 7] = avg_ov
+                    else:
+                        print(f"CAN ID {idx} not yet handled for message {message}")
 
             # print(f"Stored {message} at index {idx}")
             index.value += 1  # Move to next index

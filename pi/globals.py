@@ -27,7 +27,7 @@ SENS_NAMES = ["SteeringWheel", "IMUAccelX", "IMUAccelY", "IMUAccelZ", "ImuGyroX"
                "WSFrontRight", "WSBackLeft", "WSBackRight", "Motor1", "Motor2", 
                "Motor3", "Motor4", "Motor5", "Motor6", "Motor7", "Motor8", "Motor9", "Motor10", 
                "Motor11", "Motor12", "Motor13", "Motor14", "Motor15", "Motor16", 
-               "BMSVolt1", "BMSVolt2", "BMSRes1", "BMSRes2", "BMSOV1", "BMSOV2", "BMS7", "BMS8"]
+               "BMSVolt1", "BMSVolt2", "BMSRes1", "BMSRes2", "BMSOV1", "BMSOV2", "BMSResAvg", "BMSOVAvg"]
 
 SHMEM_NMEM = len(SENS_NAMES)
 # datatype of sensor readings to be stored in shm
@@ -36,3 +36,4 @@ SHMEM_MEMB_SIZE = np.dtype(SHMEM_DTYPE).itemsize
 SHMEM_TOTAL_SIZE = SHMEM_NMEM * SHMEM_MEMB_SIZE
 
 MOTOR_START_IDX = SENS_NAMES.index("Motor1")
+BMS_START_IDX = SENS_NAMES.index("BMSVolt1")
