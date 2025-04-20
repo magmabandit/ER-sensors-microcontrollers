@@ -85,13 +85,14 @@ void read_can_from_file(const char *filename, redisContext *redis) {
     fclose(file);
 }
 
-int main() {
-    redisContext *redis = connect_redis();
-    if (!redis) return EXIT_FAILURE;
-
-    printf("Reading CAN messages from file: %s\n", TEST_FILE);
-    read_can_from_file(TEST_FILE, redis);
-
-    redisFree(redis);
-    return EXIT_SUCCESS;
-}
+// Comment out main so this will compile with canusb.c
+//int main() {
+//    redisContext *redis = connect_redis();
+//    if (!redis) return EXIT_FAILURE;
+//
+//    printf("Reading CAN messages from file: %s\n", TEST_FILE);
+//    read_can_from_file(TEST_FILE, redis);
+//
+//    redisFree(redis);
+//    return EXIT_SUCCESS;
+//}
