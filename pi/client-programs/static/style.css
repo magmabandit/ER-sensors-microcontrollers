@@ -68,13 +68,18 @@
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 5px;
+  /* padding: 5px; */
   padding-top: 10px;
   padding-bottom: 10px;
   margin-top: auto;
   width: 70%;
-  height: 300px;
+  height: 40%;
   border: 2px solid black;
+}
+
+.center_speed {
+  display: flex;
+  justify-content: center;
 }
 
 .temperature-box {
@@ -101,7 +106,7 @@
 
 .speed-box {
   width: 50%;
-  height: 200px;
+  height: 20%;
   padding-top: 50px;
   padding-bottom: 10px;
   border: 2px solid black;
