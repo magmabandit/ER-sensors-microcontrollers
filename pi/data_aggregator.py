@@ -267,6 +267,7 @@ while True:
         #     shm_handle[0] = SHMEM_DTYPE(a1_data[0])
         #     shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
-        write_to_arduino(ard1, shm_handle, 0, 1)
+        # Send motor temp, pedal
+        write_to_arduino(ard1, shm_handle, MOTOR_START_IDX + 4, MOTOR_START_IDX + 5)
         # sync every 1 ms
         time.sleep(.001)

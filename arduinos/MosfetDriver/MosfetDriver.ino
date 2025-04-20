@@ -11,8 +11,8 @@ union FloatUnion {
 
 void setup() {
     Serial.begin(19200); 
-    pinMode(12, OUTPUT);
-    pinMode(13, OUTPUT);
+    pinMode(10, OUTPUT);
+    pinMode(11, OUTPUT);
 }
 
 void loop() {
@@ -45,9 +45,11 @@ void loop() {
             }
 
             // idea: power MOSFETs under some condition
-            if (reading1.value == 0) { digitalWrite(12, HIGH); } else { digitalWrite(12, LOW);}
+            // Motor Temp
+            if (reading1.value == 0) { analogWrite(10, HIGH); } else { analogWrite(10, LOW);}
 
-            if (reading2.value == 0) { digitalWrite(13, HIGH); Serial.write(0xAA);} else { digitalWrite(13, LOW); }
+            // Break Pedal
+            if (reading2.value == 0) { analogWrite(11, HIGH); Serial.write(0xAA);} else { analogWrite(11, LOW); }
           }
             // Template for reading a variable number of sensors:
             // -------------------------------------------------
