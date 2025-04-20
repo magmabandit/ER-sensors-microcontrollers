@@ -26,7 +26,7 @@ void publish_can_message(redisContext* redis, const struct can_frame* frame) {
         cJSON_AddNumberToObject(json, "can_dlc", frame->can_dlc);
 
         cJSON *data_array = cJSON_CreateArray();
-        for (int i = 0; i < frame->can_dlc; i++) {
+        for (int i = 0; i < 8; i++) {
             cJSON_AddItemToArray(data_array, cJSON_CreateNumber(frame->data[i]));
         }
         cJSON_AddItemToObject(json, "data", data_array);
@@ -85,13 +85,14 @@ void read_can_from_file(const char *filename, redisContext *redis) {
     fclose(file);
 }
 
-int main() {
-    redisContext *redis = connect_redis();
-    if (!redis) return EXIT_FAILURE;
-
-    printf("Reading CAN messages from file: %s\n", TEST_FILE);
-    read_can_from_file(TEST_FILE, redis);
-
-    redisFree(redis);
-    return EXIT_SUCCESS;
-}
+// Comment out main so this will compile with canusb.c
+//int main() {
+//    redisContext *redis = connect_redis();
+//    if (!redis) return EXIT_FAILURE;
+//
+//    printf("Reading CAN messages from file: %s\n", TEST_FILE);
+//    read_can_from_file(TEST_FILE, redis);
+//
+//    redisFree(redis);
+//    return EXIT_SUCCESS;
+//}

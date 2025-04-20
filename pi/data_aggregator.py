@@ -116,7 +116,7 @@ def write_to_shm(message, index, lock, shm):
 
             # Use below if its required to translate c-style char arrays
             # message = bytes((c_ubyte * 8) (data["data"])) 
-            print(f"{idx} recieved message: {message}")
+            # print(f"{idx} recieved message: {message}")
             # HANDLE ALL VALUES BELOW AS LITTLE ENDIAN
             # the math to store the MC data in the shm is based on the number
             # of MC Messages offset by the readings taken from each message.
@@ -126,6 +126,7 @@ def write_to_shm(message, index, lock, shm):
             # the shm. A more dynamic strategy is needed for future iterations
             
             if len(message) == 8: # skip chopped redis messages
+                print(f"{idx} recieved message: {message}")
                 match idx:
                     case 160: # 'A0' - template value
                         pass

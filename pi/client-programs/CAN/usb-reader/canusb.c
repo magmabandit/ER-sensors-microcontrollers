@@ -443,13 +443,18 @@ struct can_frame convert_to_can_frame(const unsigned char raw_data[32]) {
     struct can_frame frame;
 
     // Extract CAN ID (assuming stored in the first 4 bytes)
+    // This is wrong but we account for it in the data aggregator
+    // The ID is only stored in 2 bytes so this grabs extra
     memcpy(&frame.can_id, raw_data, sizeof(frame.can_id));
 
     // Extract CAN DLC (assuming stored in the next 4 bytes)
+    // We don't use the DLC because the motor controller always
+    // sends 8 byte frames
     memcpy(&frame.can_dlc, raw_data + 4, sizeof(frame.can_dlc));
 
     // Extract Data (next 8 bytes, assuming 8 bytes used)
-    memcpy(frame.data, raw_data + 8, sizeof(frame.data));
+    // Originally + 8 which was incorrect, changed to + 4
+    memcpy(frame.data, raw_data + 4, sizeof(frame.data));
 
     return frame;
 }
