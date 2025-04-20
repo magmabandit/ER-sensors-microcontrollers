@@ -60,21 +60,21 @@
 .container3 {
     display: inline-block;
     vertical-align: top; /* Align them properly */
-    margin-right: 2.5px; /* Add spacing */
+    margin: 0 auto; /* Add spacing */
 }
 
 .container2 {
+  text-align: center;
   display: flex;
   justify-content: center;
-  align-items: top;
+  align-items: center;
   padding: 5px;
   padding-top: 10px;
   padding-bottom: 10px;
   margin-top: auto;
-  width: 95%;
+  width: 70%;
   height: 300px;
   border: 2px solid black;
-  border-top: solid white;
 }
 
 .temperature-box {
