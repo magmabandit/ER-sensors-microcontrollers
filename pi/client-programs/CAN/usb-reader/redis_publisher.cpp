@@ -26,7 +26,7 @@ void publish_can_message(redisContext* redis, const struct can_frame* frame) {
         cJSON_AddNumberToObject(json, "can_dlc", frame->can_dlc);
 
         cJSON *data_array = cJSON_CreateArray();
-        for (int i = 0; i < frame->can_dlc; i++) {
+        for (int i = 0; i < 8; i++) {
             cJSON_AddItemToArray(data_array, cJSON_CreateNumber(frame->data[i]));
         }
         cJSON_AddItemToObject(json, "data", data_array);
