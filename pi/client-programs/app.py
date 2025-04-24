@@ -57,4 +57,4 @@ if __name__ == '__main__':
 
     # Runs the app using socketio for real-time data updates from the
     # shared memory.
-    socketio.run(app, debug = True)
+    socketio.run(app, debug = True, allow_unsafe_werkzeug=True)
