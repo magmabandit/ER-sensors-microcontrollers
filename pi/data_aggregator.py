@@ -143,7 +143,8 @@ def write_to_shm(message, index, lock, shm):
                     case 163: # Analog Input
                         bit_string = ''.join(format(byte, '08b') for byte in message) # for bitops.
                         pedal1 = bit_string[-10:]
-                        pedal2 = bit_string[-20:-10]
+                        # this grabs the proper bit sequence for the brake pedal
+                        pedal2 = bit_string[20:30]
                         shm[MOTOR_START_IDX + (idx - 158)] = pedal1
                         shm[MOTOR_START_IDX + (idx - 157)] = pedal2
                     case 164: # Dig. Input Status
