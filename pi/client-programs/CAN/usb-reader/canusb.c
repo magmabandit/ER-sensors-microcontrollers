@@ -496,6 +496,7 @@ static void dump_data_frames(redisContext* redis, int tty_fd)
         printf("\n");
       }
     }
+
       printf("Converting frame to struct...\n");
       struct can_frame thisFrame = convert_to_can_frame(frame);
       printf("Publishing frame...\n");

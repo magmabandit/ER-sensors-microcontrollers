@@ -103,7 +103,7 @@ def write_to_shm(message, index, lock, shm):
         # Ensure only one process writes at a time
         with lock:
             data = as_json(message)["data"]
-            print(data)            
+            # print(data)            
             # assume we are handling through canusb-reader, which grabs buffer
             # bytes along with ID
             idx_withbuf = as_json(message)["can_id"]
@@ -126,20 +126,20 @@ def write_to_shm(message, index, lock, shm):
             # the shm. A more dynamic strategy is needed for future iterations
             
             if len(message) == 8: # skip chopped redis messages
-                print(f"{idx} recieved message: {message}")
+               # print(f"{idx} recieved message: {message}")
                 match idx:
                     case 160: # 'A0' - template value
                         pass
                     case 161: # Temp 2
                         cb_temp = np.float32(struct.unpack('<H', message[0:2])[0])
-                        shm[MOTOR_START_IDX + (idx - 160)] = cb_temp
+                        shm[MOTOR_START_IDX + (idx - 160)] = cb_temp / 10
                     case 162: # Temp 3
                         cool_temp = np.float32(struct.unpack('<H', message[0:2])[0])
                         htspt_temp = np.float32(struct.unpack('<H', message[2:4])[0])
                         mot_temp = np.float32(struct.unpack('<H', message[4:6])[0])
-                        shm[MOTOR_START_IDX + (idx - 160)] = cool_temp
-                        shm[MOTOR_START_IDX + (idx - 159)] = htspt_temp
-                        shm[MOTOR_START_IDX + (idx - 158)] = mot_temp
+                        shm[MOTOR_START_IDX + (idx - 160)] = cool_temp / 10
+                        shm[MOTOR_START_IDX + (idx - 159)] = htspt_temp / 10
+                        shm[MOTOR_START_IDX + (idx - 158)] = mot_temp / 10
                     case 163: # Analog Input
                         bit_string = ''.join(format(byte, '08b') for byte in message) # for bitops.
                         pedal1 = bit_string[-10:]
@@ -151,16 +151,17 @@ def write_to_shm(message, index, lock, shm):
                     case 165: # Motor Pos.
                         motor_angle = np.float32(struct.unpack('<H', message[0:2])[0])
                         motor_speed = np.float32(struct.unpack('<H', message[2:4])[0])
-                        shm[MOTOR_START_IDX + (idx - 158)] = motor_angle
+                        shm[MOTOR_START_IDX + (idx - 158)] = motor_angle / 10
                         shm[MOTOR_START_IDX + (idx - 157)] = motor_speed
                     case 166: # Current Info
                         dc_curr = np.float32(struct.unpack('<H', message[6:])[0])
-                        shm[MOTOR_START_IDX + (idx - 157)] = dc_curr
+                        shm[MOTOR_START_IDX + (idx - 157)] = dc_curr / 10
                     case 167: # Voltage Info
                         dc_volt = np.float32(struct.unpack('<H', message[0:2])[0])
-                        shm[MOTOR_START_IDX + (idx - 157)] = dc_volt
+                        shm[MOTOR_START_IDX + (idx - 157)] = dc_volt / 10
                     case 170: # Internal States
                         vsm_state = np.float32(message[0])
+                        # print(vsm_state)
                         inv_state = np.float32(message[2])
                         direction = np.float32(int(message[7] & 1))
                         shm[MOTOR_START_IDX + (idx - 159)] = vsm_state
@@ -169,7 +170,7 @@ def write_to_shm(message, index, lock, shm):
                     case 172: # Torque / Timer
                         torque = np.float32(struct.unpack('<H', message[0:2])[0])
                         timer = np.float32(struct.unpack('<H', message[2:4])[0])
-                        shm[MOTOR_START_IDX + (idx - 158)] = torque
+                        shm[MOTOR_START_IDX + (idx - 158)] = torque / 10
                         shm[MOTOR_START_IDX + (idx - 157)] = timer
                     case _:
                         # as of now, ids < A0 are exclusively from the BMS
@@ -190,7 +191,8 @@ def write_to_shm(message, index, lock, shm):
                             shm[BMS_START_IDX + 6] = avg_res
                             shm[BMS_START_IDX + 7] = avg_ov
                         else:
-                            print(f"CAN ID {idx} not yet handled for message {message}")
+                            # print(f"CAN ID {idx} not yet handled for message {message}")
+                            pass
 
             # print(f"Stored {message} at index {idx}")
             index.value += 1  # Move to next index
@@ -238,7 +240,7 @@ while True:
     i += 1
     try:
         ard1 = serial.Serial('/dev/ttyACM0', 19200, timeout=0.001)  # Replace 'COM6' with Arduino's port
-        # ard2 = serial.Serial('COM7', 19200, timeout=0.001)
+        ard2 = serial.Serial('/dev/ttyACM1', 19200, timeout=0.001)
     except serial.SerialException:
         time.sleep(0.01)
         if i == 100:  # writes once every 100 attempts as to not flood the logs
@@ -252,7 +254,7 @@ while True:
         # handle non-CAN sensor data
         try:
             a1_data = (
-                ard1.readline().decode("utf-8").strip().split(",")
+                ard2.readline().decode("utf-8").strip().split(",")
             )  # readings are comma separated
             # a2_data = ard2. ...
         except UnicodeDecodeError:
@@ -269,6 +271,8 @@ while True:
         #     shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
         # Send motor temp, pedal
-        write_to_arduino(ard1, shm_handle, MOTOR_START_IDX + 4, MOTOR_START_IDX + 5)
+        write_to_arduino(ard1, shm_handle, MOTOR_START_IDX + 4, MOTOR_START_IDX + 6)
+        # Send VSM State
+        write_to_arduino(ard2, shm_handle, MOTOR_START_IDX + 11)
         # sync every 1 ms
         time.sleep(.001)
