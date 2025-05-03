@@ -184,24 +184,24 @@ static int frame_recv(int tty_fd, unsigned char *frame, int frame_len_max)
   int result, frame_len, checksum;
   unsigned char byte;
 
-  if (print_traffic)
-    fprintf(stderr, "<<< ");
+//  if (print_traffic)
+//    fprintf(stderr, "<<< ");
 
   frame_len = 0;
   while (program_running) {
     result = read(tty_fd, &byte, 1);
     if (result == -1) {
       if (errno != EAGAIN && errno != EWOULDBLOCK) {
-        fprintf(stderr, "read() failed: %s\n", strerror(errno));
+      //  fprintf(stderr, "read() failed: %s\n", strerror(errno));
         return -1;
       }
 
     } else if (result > 0) {
-      if (print_traffic)
-        fprintf(stderr, "%02x ", byte);
+  //    if (print_traffic)
+    //    fprintf(stderr, "%02x ", byte);
 
       if (frame_len == frame_len_max) {
-        fprintf(stderr, "frame_recv() failed: Overflow\n");
+      //  fprintf(stderr, "frame_recv() failed: Overflow\n");
         return -1;
       }
 
@@ -215,14 +215,14 @@ static int frame_recv(int tty_fd, unsigned char *frame, int frame_len_max)
     usleep(10);
   }
 
-  if (print_traffic)
-    fprintf(stderr, "\n");
+ // if (print_traffic)
+ //   fprintf(stderr, "\n");
 
   /* Compare checksum for command frames only. */
   if ((frame_len == 20) && (frame[0] == 0xaa) && (frame[1] == 0x55)) {
     checksum = generate_checksum(&frame[2], 17);
     if (checksum != frame[frame_len - 1]) {
-      fprintf(stderr, "frame_recv() failed: Checksum incorrect\n");
+   //   fprintf(stderr, "frame_recv() failed: Checksum incorrect\n");
       return -1;
     }
   }
@@ -472,9 +472,9 @@ static void dump_data_frames(redisContext* redis, int tty_fd)
       break;
 
     clock_gettime(CLOCK_MONOTONIC, &ts);
-    printf("%lu.%06lu ", ts.tv_sec, ts.tv_nsec / 1000);
+    //printf("%lu.%06lu ", ts.tv_sec, ts.tv_nsec / 1000);
 
-    if (frame_len == -1) {
+/*    if (frame_len == -1) {
       printf("Frame recieve error!\n");
 
     } else {
@@ -495,11 +495,11 @@ static void dump_data_frames(redisContext* redis, int tty_fd)
         }
         printf("\n");
       }
-    }
+    }*/
 
-      printf("Converting frame to struct...\n");
+     // printf("Converting frame to struct...\n");
       struct can_frame thisFrame = convert_to_can_frame(frame);
-      printf("Publishing frame...\n");
+     // printf("Publishing frame...\n");
       publish_can_message(redis, &thisFrame);
 
     if (terminate_after && (--terminate_after == 0))
@@ -615,7 +615,8 @@ int main(int argc, char *argv[])
   redisContext* redis = connect_redis();
   if (!redis) return EXIT_FAILURE;
 
-  int c, tty_fd;
+  int c;
+  int tty_fd = -1;
   char *tty_device = NULL, *inject_data = NULL, *inject_id = NULL;
   CANUSB_SPEED speed = CANUSB_SPEED_0;
   int baudrate = CANUSB_TTY_BAUD_RATE_DEFAULT;
@@ -685,9 +686,13 @@ int main(int argc, char *argv[])
     return EXIT_FAILURE;
   }
 
-  tty_fd = adapter_init(tty_device, baudrate);
-  if (tty_fd == -1) {
-    return EXIT_FAILURE;
+  // tty_fd = adapter_init(tty_device, baudrate);
+  // if (tty_fd == -1) {
+  //   return EXIT_FAILURE;
+  // }
+  while(tty_fd == -1) {
+    usleep(100000);
+    tty_fd = adapter_init(tty_device, baudrate);
   }
 
   command_settings(tty_fd, speed, CANUSB_MODE_NORMAL, CANUSB_FRAME_STANDARD);

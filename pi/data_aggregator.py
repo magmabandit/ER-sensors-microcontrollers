@@ -66,7 +66,7 @@ def redis_subscriber(
     shm,
     host="localhost",
     port=6379,
-    max_redis_reads_per_second=10,
+    max_redis_reads_per_second=100000,
 ):
     r = redis.Redis(host=host, port=port, db=0)
     pubsub = r.pubsub()
@@ -143,8 +143,11 @@ def write_to_shm(message, index, lock, shm):
                     case 163: # Analog Input
                         bit_string = ''.join(format(byte, '08b') for byte in message) # for bitops.
                         pedal1 = bit_string[-10:]
-                        # this grabs the proper bit sequence for the brake pedal
+                        # this grabs the proper bits
                         pedal2 = bit_string[20:30]
+                        pedal2 = float(int(pedal2, 2)) / 100
+                        pedal2 += 1.03
+                        print(pedal2)
                         shm[MOTOR_START_IDX + (idx - 158)] = pedal1
                         shm[MOTOR_START_IDX + (idx - 157)] = pedal2
                     case 164: # Dig. Input Status
@@ -162,7 +165,6 @@ def write_to_shm(message, index, lock, shm):
                         shm[MOTOR_START_IDX + (idx - 157)] = dc_volt / 10
                     case 170: # Internal States
                         vsm_state = np.float32(message[0])
-                        # print(vsm_state)
                         inv_state = np.float32(message[2])
                         direction = np.float32(int(message[7] & 1))
                         shm[MOTOR_START_IDX + (idx - 159)] = vsm_state
@@ -272,8 +274,8 @@ while True:
         #     shm_handle[1] = SHMEM_DTYPE(a1_data[1])
 
         # Send motor temp, pedal
-        write_to_arduino(ard1, shm_handle, MOTOR_START_IDX + 4, MOTOR_START_IDX + 6)
+        write_to_arduino(ard1, shm_handle, MOTOR_START_IDX + 6)
         # Send VSM State
         write_to_arduino(ard2, shm_handle, MOTOR_START_IDX + 11)
         # sync every 1 ms
-        time.sleep(.001)
+        
